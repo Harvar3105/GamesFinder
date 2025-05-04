@@ -1,0 +1,66 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.vs/
+*.vscode/
+*.dbmdl
+*.pdb
+*.cache
+*.log
+*.vspscc
+*.vssscc
+
+# ASP.NET Core user secrets
+**/secrets.json
+
+# DotCover (JetBrains)
+.idea/.idea.DotSettings
+.idea/.idea.DotSettings.user
+.idea/.idea.*
+.idea/modules.xml
+.idea/*.iml
+
+# Rider project files
+.idea/
+*.sln.iml
+
+# Resharper
+_ReSharper*/
+*.DotSettings.user
+*.DotSettings
+
+# Rider-generated logs
+.idea/.rider/
+
+# ASP.NET publish output
+publish/
+wwwroot/generated/
+wwwroot/lib/
+
+# Local environment settings
+.env
+*.env.local
+appsettings.Development.json
+
+# Logs
+logs/
+*.log
+
+# Dependency directories
+node_modules/
+packages/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Template generated
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
