@@ -68,3 +68,5 @@ riderModule.iml
 # User added
 *.bson
 *.mongodb
+GamesFinder.API/appsettings.json
+GamesFinder.API/appsettings.Development.json
