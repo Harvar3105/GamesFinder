@@ -1,5 +1,4 @@
-﻿using GamesFinder.Domain.Entities;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson.Serialization.Attributes;
 
 namespace GamesFinder.Domain.Classes.Entities;
 

@@ -1,7 +1,5 @@
 ﻿using GamesFinder.Domain.Classes.Entities;
-using GamesFinder.Domain.Crawlers;
-using GamesFinder.Domain.Entities;
-using GamesFinder.Domain.Repositories;
+using GamesFinder.Domain.Interfaces.Crawlers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

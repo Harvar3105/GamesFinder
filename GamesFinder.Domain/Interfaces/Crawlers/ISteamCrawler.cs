@@ -1,7 +1,6 @@
 ﻿using GamesFinder.Domain.Classes.Entities;
-using GamesFinder.Domain.Entities;
 
-namespace GamesFinder.Domain.Crawlers;
+namespace GamesFinder.Domain.Interfaces.Crawlers;
 
 public interface ISteamCrawler
 {

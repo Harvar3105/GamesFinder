@@ -1,4 +1,4 @@
-﻿namespace GamesFinder.Domain.Entities;
+﻿namespace GamesFinder.Domain.Classes.Entities.Steam;
 
 public class SteamGameData
 {

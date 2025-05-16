@@ -1,10 +1,9 @@
-﻿using GamesFinder.Domain.Classes.Entities;
-using GamesFinder.Domain.Enums;
+﻿using GamesFinder.Domain.Enums;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.Options;
 
-namespace GamesFinder.Domain.Entities;
+namespace GamesFinder.Domain.Classes.Entities;
 
 public class GameOffer : Entity
 {

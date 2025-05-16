@@ -1,8 +1,7 @@
 ﻿using AngleSharp.Html.Parser;
 using GamesFinder.Domain.Classes.Entities;
-using GamesFinder.Domain.Crawlers;
-using GamesFinder.Domain.Entities;
 using GamesFinder.Domain.Enums;
+using GamesFinder.Domain.Interfaces.Crawlers;
 
 namespace GamesFinder.Application;
 

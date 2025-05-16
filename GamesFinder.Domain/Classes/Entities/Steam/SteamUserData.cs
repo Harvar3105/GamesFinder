@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace GamesFinder.Domain.Entities;
+namespace GamesFinder.Domain.Classes.Entities.Steam;
 
 public class SteamUserData
 {

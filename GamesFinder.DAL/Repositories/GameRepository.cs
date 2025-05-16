@@ -1,5 +1,5 @@
 ﻿using GamesFinder.Domain.Classes.Entities;
-using GamesFinder.Domain.Repositories;
+using GamesFinder.Domain.Interfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 

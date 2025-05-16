@@ -1,6 +1,6 @@
-﻿using GamesFinder.Domain.Entities;
+﻿using GamesFinder.Domain.Classes.Entities;
 
-namespace GamesFinder.Domain.Repositories;
+namespace GamesFinder.Domain.Interfaces.Repositories;
 
 public interface IGameOfferRepository<TEntity> : IRepository<TEntity> where TEntity : GameOffer
 {
