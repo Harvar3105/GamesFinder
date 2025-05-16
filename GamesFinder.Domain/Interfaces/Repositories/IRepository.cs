@@ -7,6 +7,8 @@ public interface IRepository<TEntity> where TEntity : Entity
 {
     Task<bool> SaveAsync(TEntity entity);
     Task<bool> SaveManyAsync(IEnumerable<TEntity> entities);
+    public Task<bool> SaveOrUpdateAsync(TEntity entity);
+    public Task<bool> SaveOrUpdateManyAsync(IEnumerable<TEntity> entities);
     Task<bool> DeleteAsync(Guid id);
     Task<bool> UpdateAsync(TEntity entity);
     Task<ICollection<TEntity>> GetAllAsync();

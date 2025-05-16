@@ -12,23 +12,22 @@ namespace GamesFinder.Controllers;
 public class SteamCrawlerController : ControllerBase
 {
     private readonly ISteamCrawler _steamCrawlerController;
-    private readonly IGameOfferRepository<GameOffer> _gameOfferRepository;
-    private readonly IGameRepository<Game> _gameRepository;
     private readonly ILogger<SteamCrawlerController> _logger;
 
-    public SteamCrawlerController(ISteamCrawler steamCrawlerController, IGameOfferRepository<GameOffer> gameOfferRepository, IGameRepository<Game> gameRepository, ILogger<SteamCrawlerController> logger)
+    public SteamCrawlerController(ISteamCrawler steamCrawlerController, ILogger<SteamCrawlerController> logger)
     {
         _steamCrawlerController = steamCrawlerController;
-        _gameOfferRepository = gameOfferRepository;
-        _gameRepository = gameRepository;
+
         _logger = logger;
     }
 
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> CrawlSteam([FromBody] ICollection<int> gamesIds)
+    public async Task<IActionResult> CrawlSteam([FromBody] SteamCrawlerControllerModel request)
     {
         _logger.LogInformation("Crawling games...");
+        
+        var gamesIds = request.GamesIds;
         
         int batches = (int)Math.Ceiling(gamesIds.Count / (decimal)200);
         int pauses = Math.Max(0, batches - 1);
@@ -36,28 +35,16 @@ public class SteamCrawlerController : ControllerBase
 
         _ = Task.Run(async () =>
         {
-            List<Game> games = await _steamCrawlerController.CrawlGamesAsync(gamesIds);
-            List<GameOffer> gamesOffers = new();
-
-            foreach (var game in games)
-            {
-                gamesOffers.AddRange(game.Offers);
-            }
-
-            var success1 = await _gameRepository.SaveManyAsync(games);
-            if (!success1)
-            {
-                _logger.LogError("Something went wrong, couldn't save games");
-            }
-            
-            var success2 = await _gameOfferRepository.SaveManyAsync(gamesOffers);
-            if (!success2)
-            {
-                _logger.LogError("Something went wrong, couldn't save games");
-            }
+            await _steamCrawlerController.CrawlGamesAsync(gamesIds);
+            _logger.LogInformation("Crawling finished");
         });
         
-        _logger.LogInformation("Crawling finished");
         return Accepted($"Crawling started, will take around {totalCooldownMinutes} minutes");
     }
+}
+
+public class SteamCrawlerControllerModel
+{
+    public List<int> GamesIds { get; set; }
+    public bool ForceUpdate { get; set; } = false;
 }

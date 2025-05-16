@@ -47,6 +47,47 @@ public class Repository<T> : IRepository<T> where T : Entity
         return true;
     }
 
+    public async Task<bool> SaveOrUpdateAsync(T entity)
+    {
+        try
+        {
+            var filter = Builders<T>.Filter.Eq(e => e.Id, entity.Id);
+            await Collection.ReplaceOneAsync(filter, entity, new ReplaceOptions { IsUpsert = true });
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex.Message);
+            return false;
+        }
+        
+        return true;
+    }
+
+    public async Task<bool> SaveOrUpdateManyAsync(IEnumerable<T> entities)
+    {
+        try
+        {
+            var models = new List<WriteModel<T>>();
+
+            foreach (var entity in entities)
+            {
+                var filter = Builders<T>.Filter.Eq(e => e.Id, entity.Id);
+                var replaceOne = new ReplaceOneModel<T>(filter, entity) {IsUpsert = true};
+                models.Add(replaceOne);
+            }
+
+            var result = await Collection.BulkWriteAsync(models);
+            return result != null;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex.Message);
+            return false;
+        }
+
+        return true;
+    }
+
     public async Task<bool> DeleteAsync(Guid id)
     {
         var result = await Collection.DeleteOneAsync(e => e.Id == id);

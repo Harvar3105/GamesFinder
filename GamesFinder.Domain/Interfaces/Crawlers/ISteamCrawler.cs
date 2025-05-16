@@ -5,6 +5,6 @@ namespace GamesFinder.Domain.Crawlers;
 
 public interface ISteamCrawler
 {
-    public Task<List<Game>> CrawlGamesAsync(ICollection<int> gameIds);
-    public Task<List<Game>> CrawlPricesAsync(ICollection<Game> games);
+    public Task CrawlGamesAsync(ICollection<int> gameIds);
+    public Task CrawlPricesAsync(ICollection<Game> games);
 }
