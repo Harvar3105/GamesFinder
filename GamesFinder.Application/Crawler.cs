@@ -1,15 +1,17 @@
-﻿using GamesFinder.Domain.Entities;
+﻿using AngleSharp.Html.Parser;
+using GamesFinder.Domain.Classes.Entities;
+using GamesFinder.Domain.Crawlers;
+using GamesFinder.Domain.Entities;
 using GamesFinder.Domain.Enums;
-using AngleSharp;
-using AngleSharp.Html.Parser;
 
-namespace GamesFinder.Domain.Crawlers;
+namespace GamesFinder.Application;
 
 public class Crawler : ICrawler
 {
     private static readonly HttpClient Client = new HttpClient();
     private static readonly HtmlParser HtmlParser = new HtmlParser();
-    private readonly Vendor Vendor;
+    private readonly string Vendor;
+    private readonly string Url;
     private readonly ECurrency Currency;
     private readonly int StartId;
     private readonly int StopId;
@@ -17,7 +19,7 @@ public class Crawler : ICrawler
     private int CurrentId { get; set; }
     private Dictionary<Game, List<GameOffer>> Offers { get; } = new ();
 
-    public Crawler(Vendor vendor, int startId, int stopId, decimal? delay, ECurrency currency)
+    public Crawler(string vendor, int startId, int stopId, decimal? delay, ECurrency currency)
     {
         Vendor = vendor;
         StartId = startId;
@@ -33,7 +35,7 @@ public class Crawler : ICrawler
         {
             while (CurrentId <= StopId)
             {
-                var pageContent = await Client.GetStringAsync(FormNewString());
+                var pageContent = await Client.GetStringAsync(Url);
                 var game = ExtractGame(pageContent);
                 
                 
@@ -56,9 +58,5 @@ public class Crawler : ICrawler
 
         return new Game(name: name, description: description);
     }
-
-    private String FormNewString()
-    {
-        return Vendor.URL.Replace("{lang}", "en").Replace("{id}", CurrentId.ToString());
-    }
+    
 }

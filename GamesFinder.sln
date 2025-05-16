@@ -9,13 +9,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "!SolutionItems", "!Solution
 		docker-compose.yaml = docker-compose.yaml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder.Domain", "GamesFinder.Domain\GamesFinder.Domain.csproj", "{5047641E-AA61-4DE5-9CD3-0E5D89E93D73}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder.Shared", "GamesFinder.Shared\GamesFinder.Shared.csproj", "{9FBEA6AF-5809-4130-BFBB-AA59E81C5384}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder.DAL", "GamesFinder.DAL\GamesFinder.DAL.csproj", "{98C9808D-2D01-4B18-B704-AFB50E695432}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder.Configuration", "GamesFinder.Configuration\GamesFinder.Configuration.csproj", "{5F23C137-B0C1-4890-8E22-DBA5ACF751F5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder.DAL", "GamesFinder.DAL\GamesFinder.DAL.csproj", "{A4D2A49B-C6AC-4F9E-87DE-E5113F851F82}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder.Domain", "GamesFinder.Domain\GamesFinder.Domain.csproj", "{E4AF4AC8-6801-41F2-A62F-758753CE2884}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder.Application", "GamesFinder.Application\GamesFinder.Application.csproj", "{A920E5E8-005E-47C3-B35E-BFD68A8F1A51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,21 +27,21 @@ Global
 		{6906BD8C-7310-4641-853A-9AF3A97D130E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6906BD8C-7310-4641-853A-9AF3A97D130E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6906BD8C-7310-4641-853A-9AF3A97D130E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5047641E-AA61-4DE5-9CD3-0E5D89E93D73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5047641E-AA61-4DE5-9CD3-0E5D89E93D73}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5047641E-AA61-4DE5-9CD3-0E5D89E93D73}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5047641E-AA61-4DE5-9CD3-0E5D89E93D73}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9FBEA6AF-5809-4130-BFBB-AA59E81C5384}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9FBEA6AF-5809-4130-BFBB-AA59E81C5384}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9FBEA6AF-5809-4130-BFBB-AA59E81C5384}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9FBEA6AF-5809-4130-BFBB-AA59E81C5384}.Release|Any CPU.Build.0 = Release|Any CPU
-		{98C9808D-2D01-4B18-B704-AFB50E695432}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{98C9808D-2D01-4B18-B704-AFB50E695432}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{98C9808D-2D01-4B18-B704-AFB50E695432}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{98C9808D-2D01-4B18-B704-AFB50E695432}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5F23C137-B0C1-4890-8E22-DBA5ACF751F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5F23C137-B0C1-4890-8E22-DBA5ACF751F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5F23C137-B0C1-4890-8E22-DBA5ACF751F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5F23C137-B0C1-4890-8E22-DBA5ACF751F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4D2A49B-C6AC-4F9E-87DE-E5113F851F82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4D2A49B-C6AC-4F9E-87DE-E5113F851F82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4D2A49B-C6AC-4F9E-87DE-E5113F851F82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4D2A49B-C6AC-4F9E-87DE-E5113F851F82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4AF4AC8-6801-41F2-A62F-758753CE2884}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4AF4AC8-6801-41F2-A62F-758753CE2884}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4AF4AC8-6801-41F2-A62F-758753CE2884}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4AF4AC8-6801-41F2-A62F-758753CE2884}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A920E5E8-005E-47C3-B35E-BFD68A8F1A51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A920E5E8-005E-47C3-B35E-BFD68A8F1A51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A920E5E8-005E-47C3-B35E-BFD68A8F1A51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A920E5E8-005E-47C3-B35E-BFD68A8F1A51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

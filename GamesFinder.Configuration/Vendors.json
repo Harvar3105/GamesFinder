@@ -1,7 +1,16 @@
 ﻿{
   "Vendors": {
     "InstantGaming": {
-      "URL": "https://www.instant-gaming.com/{lang}/{id}-buy-game/"
+      "UrlPattern": "https://www.instant-gaming.com/{lang}/{id}-buy-game/",
+      "Url": "www.instant-gaming.com",
+      "MaxReqs": 200,
+      "CooldownMinutes": 5
+    },
+    "Steam": {
+      "UrlPattern": "https://store.steampowered.com/api/appdetails?appids={id}",
+      "Url": "store.steampowered.com",
+      "MaxReqs": 200,
+      "CooldownMinutes": 5
     }
   }
 }

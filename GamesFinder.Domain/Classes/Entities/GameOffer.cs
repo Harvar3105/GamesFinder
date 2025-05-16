@@ -1,18 +1,28 @@
-﻿using GamesFinder.Domain.Enums;
+﻿using GamesFinder.Domain.Classes.Entities;
+using GamesFinder.Domain.Enums;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.Options;
 
 namespace GamesFinder.Domain.Entities;
 
 public class GameOffer : Entity
 {
-    public Guid GameId { get; }
-    public Guid VendorId { get; }
+    [BsonElement("game_id")]
+    [BsonRepresentation(BsonType.String)]
+    public Guid GameId { get; set; }
+    [BsonElement("vendor")]
+    public string Vendor { get; set; }
+    [BsonElement("available")]
     public bool Available { get; set; }
-    public Dictionary<ECurrency, decimal?> Prices { get; }
+    [BsonElement("price")]
+    [BsonDictionaryOptions(DictionaryRepresentation.Document)]
+    public Dictionary<ECurrency, (decimal, decimal)> Prices { get; set; }
 
-    protected GameOffer(Guid gameId, Guid vendorId, Dictionary<ECurrency, decimal?> prices, bool available = false)
+    public GameOffer(Guid gameId, String vendor, Dictionary<ECurrency, (decimal, decimal)> prices, bool available = false)
     {
         GameId = gameId;
-        VendorId = vendorId;
+        Vendor = vendor;
         Available = available;
         Prices = prices;
     }

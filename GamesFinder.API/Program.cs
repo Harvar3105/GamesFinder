@@ -1,5 +1,11 @@
 ﻿using System.Text;
+using GamesFinder.Application;
 using GamesFinder.DAL;
+using GamesFinder.DAL.Repositories;
+using GamesFinder.Domain.Classes.Entities;
+using GamesFinder.Domain.Crawlers;
+using GamesFinder.Domain.Entities;
+using GamesFinder.Domain.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -49,6 +55,10 @@ builder.Services.AddAuthentication(options =>
 }).AddJwtBearer(options => {options.TokenValidationParameters = twp; });
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddSingleton<ISteamCrawler, SteamCrawler>();
+builder.Services.AddScoped<IGameOfferRepository<GameOffer>, GameOfferRepository>();
+builder.Services.AddScoped<IGameRepository<Game>, GameRepository>();
 
 var app = builder.Build();
 

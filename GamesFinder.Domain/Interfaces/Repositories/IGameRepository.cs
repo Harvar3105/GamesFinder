@@ -1,4 +1,5 @@
-﻿using GamesFinder.Domain.Entities;
+﻿using GamesFinder.Domain.Classes.Entities;
+using GamesFinder.Domain.Entities;
 
 namespace GamesFinder.Domain.Repositories;
 

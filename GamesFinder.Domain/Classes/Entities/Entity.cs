@@ -1,8 +1,15 @@
-﻿namespace GamesFinder.Domain.Entities;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace GamesFinder.Domain.Classes.Entities;
 
 public abstract class Entity
 {
-    public Guid? Id = Guid.NewGuid();
-    public DateTime CreatedAt = DateTime.Now.ToUniversalTime();
-    public DateTime UpdatedAt = DateTime.Now.ToUniversalTime();
+    [BsonId]
+    [BsonRepresentation(BsonType.String)]
+    public Guid Id { get; set; } = Guid.NewGuid();
+    [BsonElement("createdAt")]
+    public DateTime CreatedAt { get; set; } = DateTime.Now.ToUniversalTime();
+    [BsonElement("updatedAt")]
+    public DateTime UpdatedAt { get; set; } = DateTime.Now.ToUniversalTime();
 }
