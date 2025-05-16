@@ -1,5 +1,4 @@
-﻿using GamesFinder.Domain.Classes.Entities;
-using GamesFinder.Domain.Interfaces.Crawlers;
+﻿using GamesFinder.Domain.Interfaces.Crawlers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
