@@ -6,4 +6,6 @@ public interface IGameRepository<TEntity> : IRepository<TEntity> where TEntity :
 {
     Task<Game> GetByAppId(int appId);
     Task<List<Game>> GetByAppIds(IEnumerable<int> appIds);
+
+    Task<bool> ExistsByAppIdAsync(int appId);
 }

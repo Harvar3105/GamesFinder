@@ -32,7 +32,7 @@ public class SteamCrawlerController : ControllerBase
 
         _ = Task.Run(async () =>
         {
-            await _steamCrawlerController.CrawlGamesAsync(gamesIds);
+            await _steamCrawlerController.CrawlGamesAsync(gamesIds, request.ForceUpdate);
             _logger.LogInformation("Crawling finished");
         });
         
@@ -42,6 +42,6 @@ public class SteamCrawlerController : ControllerBase
 
 public class SteamCrawlerControllerModel
 {
-    public List<int> GamesIds { get; set; }
+    public required List<int> GamesIds { get; set; }
     public bool ForceUpdate { get; set; } = false;
 }

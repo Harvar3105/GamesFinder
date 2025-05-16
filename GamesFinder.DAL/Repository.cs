@@ -108,4 +108,9 @@ public class Repository<T> : IRepository<T> where T : Entity
     {
         return await Collection.Find(e => e.Id == id).FirstOrDefaultAsync();
     }
+
+    public async Task<bool> ExistsAsync(Guid id)
+    {
+        return await Collection.Find(e => e.Id == id).AnyAsync();
+    }
 }

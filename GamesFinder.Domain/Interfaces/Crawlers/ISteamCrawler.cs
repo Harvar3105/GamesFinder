@@ -4,6 +4,6 @@ namespace GamesFinder.Domain.Interfaces.Crawlers;
 
 public interface ISteamCrawler
 {
-    public Task CrawlGamesAsync(ICollection<int> gameIds);
-    public Task CrawlPricesAsync(ICollection<Game> games);
+    public Task CrawlGamesAsync(ICollection<int> gameIds, bool force = false);
+    public Task CrawlPricesAsync(ICollection<Game> games, bool force = false);
 }

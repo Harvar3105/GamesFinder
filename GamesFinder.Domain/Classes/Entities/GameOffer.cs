@@ -16,13 +16,27 @@ public class GameOffer : Entity
     public bool Available { get; set; }
     [BsonElement("price")]
     [BsonDictionaryOptions(DictionaryRepresentation.Document)]
-    public Dictionary<ECurrency, (decimal, decimal)> Prices { get; set; }
+    public Dictionary<ECurrency, PriceRange> Prices { get; set; }
 
-    public GameOffer(Guid gameId, String vendor, Dictionary<ECurrency, (decimal, decimal)> prices, bool available = false)
+    public GameOffer(Guid gameId, String vendor, Dictionary<ECurrency, PriceRange> prices, bool available = false)
     {
         GameId = gameId;
         Vendor = vendor;
         Available = available;
         Prices = prices;
+    }
+
+    public class PriceRange
+    {
+        [BsonElement("initial")]
+        public decimal? Initial { get; set; }
+        [BsonElement("current")]
+        public decimal? Current { get; set; }
+
+        public PriceRange(decimal? initial, decimal? current)
+        {
+            Initial = initial;
+            Current = current;
+        }
     }
 }

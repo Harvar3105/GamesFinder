@@ -25,7 +25,7 @@ public class SteamCrawler : ISteamCrawler
         _gameOfferRepository = gameOfferRepository;
     }
 
-    public async Task CrawlGamesAsync(ICollection<int> gameIds)
+    public async Task CrawlGamesAsync(ICollection<int> gameIds, bool force = false)
     {
         var games = new List<Game>();
         var callsCount = 0;
@@ -37,8 +37,14 @@ public class SteamCrawler : ISteamCrawler
                 await SaveOrUpdateBulk(games);
                 await Task.Delay(TimeSpan.FromMinutes(CooldownMinutes));
             }
+
+            if (!force)
+            {
+                if (await _gameRepository.ExistsByAppIdAsync(gameId)) continue;
+            }
             
             var response = await Client.GetAsync(new Uri(GameData + gameId));
+            callsCount++;
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogError($"Error getting game data for {gameId}, ${response.StatusCode}");
@@ -51,8 +57,6 @@ public class SteamCrawler : ISteamCrawler
             if (game == null) continue;
             
             games.Add(game);
-
-            callsCount++;
         }
         
         await SaveOrUpdateBulk(games);
@@ -81,7 +85,7 @@ public class SteamCrawler : ISteamCrawler
         games.Clear();
     }
     
-    public async Task CrawlPricesAsync(ICollection<Game> games)
+    public async Task CrawlPricesAsync(ICollection<Game> games, bool force = false)
     {
         var callsCount = 0;
         throw new NotImplementedException("Implement");
@@ -106,17 +110,17 @@ public class SteamCrawler : ISteamCrawler
         if (name == null) return null;
         var game = new Game(name: name, description: description, appId: appId, steamURL: steamUrl);
 
-        Dictionary<ECurrency, (decimal, decimal)> prices = new();
+        Dictionary<ECurrency, GameOffer.PriceRange> prices = new();
         switch (currency)
         {
             case null:
-                prices.Add(ECurrency.Eur, (0, 0));
+                prices.Add(ECurrency.Eur, new GameOffer.PriceRange(null, null));
                 break;
             case "EUR":
-                prices.Add(ECurrency.Eur, (decimal.Parse(initialPrice), decimal.Parse(currentPrice ?? initialPrice)));
+                prices.Add(ECurrency.Eur, new GameOffer.PriceRange(decimal.Parse(initialPrice), decimal.Parse(currentPrice ?? initialPrice)));
                 break;
             case "USD":
-                prices.Add(ECurrency.Usd, (decimal.Parse(initialPrice), decimal.Parse(currentPrice ?? initialPrice)));
+                prices.Add(ECurrency.Usd, new GameOffer.PriceRange(decimal.Parse(initialPrice), decimal.Parse(currentPrice ?? initialPrice)));
                 break;
         }
         

@@ -12,4 +12,5 @@ public interface IRepository<TEntity> where TEntity : Entity
     Task<bool> UpdateAsync(TEntity entity);
     Task<ICollection<TEntity>> GetAllAsync();
     Task<TEntity?> GetByIdAsync(Guid id);
+    public Task<bool> ExistsAsync(Guid id);
 }

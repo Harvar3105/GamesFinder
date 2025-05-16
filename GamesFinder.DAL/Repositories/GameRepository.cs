@@ -21,4 +21,9 @@ public class GameRepository : Repository<Game>, IGameRepository<Game>
     {
         return await Collection.Find(g => appIds.Contains(g.AppId ?? 0)).ToListAsync();
     }
+
+    public async Task<bool> ExistsByAppIdAsync(int appId)
+    {
+        return await Collection.Find(g => g.AppId == appId).AnyAsync();
+    }
 }
