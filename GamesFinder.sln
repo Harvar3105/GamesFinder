@@ -7,9 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "!SolutionItems", "!Solution
 		.gitignore = .gitignore
 		Dockerfile = Dockerfile
 		docker-compose.yaml = docker-compose.yaml
+		marks.txt = marks.txt
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder.Configuration", "GamesFinder.Configuration\GamesFinder.Configuration.csproj", "{5F23C137-B0C1-4890-8E22-DBA5ACF751F5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder.DAL", "GamesFinder.DAL\GamesFinder.DAL.csproj", "{A4D2A49B-C6AC-4F9E-87DE-E5113F851F82}"
 EndProject
@@ -27,10 +26,6 @@ Global
 		{6906BD8C-7310-4641-853A-9AF3A97D130E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6906BD8C-7310-4641-853A-9AF3A97D130E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6906BD8C-7310-4641-853A-9AF3A97D130E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5F23C137-B0C1-4890-8E22-DBA5ACF751F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5F23C137-B0C1-4890-8E22-DBA5ACF751F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5F23C137-B0C1-4890-8E22-DBA5ACF751F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5F23C137-B0C1-4890-8E22-DBA5ACF751F5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A4D2A49B-C6AC-4F9E-87DE-E5113F851F82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A4D2A49B-C6AC-4F9E-87DE-E5113F851F82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A4D2A49B-C6AC-4F9E-87DE-E5113F851F82}.Release|Any CPU.ActiveCfg = Release|Any CPU

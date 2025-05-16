@@ -16,7 +16,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\GamesFinder.Application\GamesFinder.Application.csproj" />
-      <ProjectReference Include="..\GamesFinder.Configuration\GamesFinder.Configuration.csproj" />
       <ProjectReference Include="..\GamesFinder.DAL\GamesFinder.DAL.csproj" />
     </ItemGroup>
 
