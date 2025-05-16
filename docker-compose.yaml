@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    container_name: back_end
+    ports:
+      - "80:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    networks:
+      - shared-network
+    
+networks:
+  shared-network:
+    name: shared-network
+    external: true
