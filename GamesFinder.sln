@@ -1,11 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder", "GamesFinder\GamesFinder.csproj", "{6906BD8C-7310-4641-853A-9AF3A97D130E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder.API", "GamesFinder.API\GamesFinder.API.csproj", "{6906BD8C-7310-4641-853A-9AF3A97D130E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "!SolutionItems", "!SolutionItems", "{D6F9962A-F6DD-4A4E-8B09-59B47D940723}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		Dockerfile = Dockerfile
+		docker-compose.yaml = docker-compose.yaml
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder.Domain", "GamesFinder.Domain\GamesFinder.Domain.csproj", "{5047641E-AA61-4DE5-9CD3-0E5D89E93D73}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder.Shared", "GamesFinder.Shared\GamesFinder.Shared.csproj", "{9FBEA6AF-5809-4130-BFBB-AA59E81C5384}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder.DAL", "GamesFinder.DAL\GamesFinder.DAL.csproj", "{98C9808D-2D01-4B18-B704-AFB50E695432}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder.Configuration", "GamesFinder.Configuration\GamesFinder.Configuration.csproj", "{5F23C137-B0C1-4890-8E22-DBA5ACF751F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,5 +27,21 @@ Global
 		{6906BD8C-7310-4641-853A-9AF3A97D130E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6906BD8C-7310-4641-853A-9AF3A97D130E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6906BD8C-7310-4641-853A-9AF3A97D130E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5047641E-AA61-4DE5-9CD3-0E5D89E93D73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5047641E-AA61-4DE5-9CD3-0E5D89E93D73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5047641E-AA61-4DE5-9CD3-0E5D89E93D73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5047641E-AA61-4DE5-9CD3-0E5D89E93D73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FBEA6AF-5809-4130-BFBB-AA59E81C5384}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FBEA6AF-5809-4130-BFBB-AA59E81C5384}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FBEA6AF-5809-4130-BFBB-AA59E81C5384}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FBEA6AF-5809-4130-BFBB-AA59E81C5384}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98C9808D-2D01-4B18-B704-AFB50E695432}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98C9808D-2D01-4B18-B704-AFB50E695432}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98C9808D-2D01-4B18-B704-AFB50E695432}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98C9808D-2D01-4B18-B704-AFB50E695432}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F23C137-B0C1-4890-8E22-DBA5ACF751F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F23C137-B0C1-4890-8E22-DBA5ACF751F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F23C137-B0C1-4890-8E22-DBA5ACF751F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F23C137-B0C1-4890-8E22-DBA5ACF751F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
