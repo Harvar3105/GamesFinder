@@ -1,4 +1,5 @@
 ﻿using GamesFinder.Domain.Classes.Entities;
+using GamesFinder.Domain.Enums;
 using GamesFinder.Domain.Interfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
@@ -16,7 +17,7 @@ public class GameOfferRepository : Repository<GameOffer>, IGameOfferRepository<G
         return await Collection.Find(e => e.GameId == gameId).ToListAsync();
     }
 
-    public async Task<ICollection<GameOffer>> GetByVendorAsync(string vendor)
+    public async Task<ICollection<GameOffer>> GetByVendorAsync(EVendor vendor)
     {
         return await Collection.Find(e => e.Vendor == vendor).ToListAsync();
     }

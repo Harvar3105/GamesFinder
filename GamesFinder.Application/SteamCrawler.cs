@@ -43,7 +43,7 @@ public class SteamCrawler : ISteamCrawler
                 if (await _gameRepository.ExistsByAppIdAsync(gameId)) continue;
             }
             
-            var response = await Client.GetAsync(new Uri(GameData + gameId));
+            var response = await Client.GetAsync(new Uri(GameData + gameId + "&l=ru"));
             callsCount++;
             if (!response.IsSuccessStatusCode)
             {
@@ -109,7 +109,8 @@ public class SteamCrawler : ISteamCrawler
         string steamUrl = $"https://store.steampowered.com/app/{appId}";
 
         if (name == null) return null;
-        var game = new Game(name: name, description: description, appId: appId, steamUrl: steamUrl, headerImage: thumbnail);
+        var game = new Game(name: name, description: description, steamUrl: steamUrl, headerImage: thumbnail);
+        game.GameIds.Add(new Game.GameId(EVendor.Steam, appId.ToString()));
 
         Dictionary<ECurrency, GameOffer.PriceRange> prices = new();
         switch (currency)
@@ -126,7 +127,7 @@ public class SteamCrawler : ISteamCrawler
         }
         
         
-        game.Offers.Add(new GameOffer(gameId: game.Id!, vendor: "Steam", prices: prices, available: true));
+        game.Offers.Add(new GameOffer(gameId: game.Id!, vendor: EVendor.Steam, prices: prices, available: true));
         
         return game;
     }

@@ -14,16 +14,20 @@ public class GameRepository : Repository<Game>, IGameRepository<Game>
 
     public async Task<Game> GetByAppId(int appId)
     {
-        return await Collection.Find(g => g.AppId == appId).FirstOrDefaultAsync();
+        return await Collection
+            .Find(g => g.GameIds.Any(v => v.Id.Equals(appId.ToString())))
+            .FirstOrDefaultAsync();
     }
 
     public async Task<List<Game>> GetByAppIds(IEnumerable<int> appIds)
     {
-        return await Collection.Find(g => appIds.Contains(g.AppId ?? 0)).ToListAsync();
+        return await Collection
+            .Find(g => g.GameIds.Any(v => appIds.Contains(int.Parse(v.Id)))).ToListAsync();
     }
 
     public async Task<bool> ExistsByAppIdAsync(int appId)
     {
-        return await Collection.Find(g => g.AppId == appId).AnyAsync();
+        return await Collection
+            .Find(g => g.GameIds.Any(v => v.Equals(appId.ToString()))).AnyAsync();
     }
 }
