@@ -105,10 +105,11 @@ public class SteamCrawler : ISteamCrawler
         string? currency = jObj["data"]?["price_overview"]?["currency"]?.ToString();
         string? initialPrice = jObj["data"]?["price_overview"]?["initial"]?.ToString() ?? "0";
         string? currentPrice = jObj["data"]?["price_overview"]?["final"]?.ToString();
+        string? thumbnail = jObj["data"]?["header_image"]?.ToString();
         string steamUrl = $"https://store.steampowered.com/app/{appId}";
 
         if (name == null) return null;
-        var game = new Game(name: name, description: description, appId: appId, steamURL: steamUrl);
+        var game = new Game(name: name, description: description, appId: appId, steamUrl: steamUrl, headerImage: thumbnail);
 
         Dictionary<ECurrency, GameOffer.PriceRange> prices = new();
         switch (currency)
