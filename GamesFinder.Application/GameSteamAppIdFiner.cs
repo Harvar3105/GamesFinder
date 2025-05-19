@@ -1,0 +1,53 @@
+﻿using GamesFinder.Domain.Classes.Entities;
+using GamesFinder.Domain.Enums;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
+
+namespace GamesFinder.Application;
+
+public class GameSteamAppIdFiner
+{
+    private static readonly string pathToFile = Path.Combine(Directory.GetCurrentDirectory(), "..", "applist.json");
+    private JObject? appsIds = null;
+    private readonly ILogger<GameSteamAppIdFiner> logger;
+
+    public GameSteamAppIdFiner(ILogger<GameSteamAppIdFiner> logger)
+    {
+        this.logger = logger;
+        
+        Update();
+    }
+
+    public void Update()
+    {
+        try
+        {
+            appsIds = JObject.Parse(File.ReadAllText(pathToFile));
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e.Message);
+        }
+    }
+
+    public Game? FindAppId(string gameName)
+    {
+        if (appsIds == null)
+        {
+            logger.LogError("File not found!");
+            return null;
+        }
+        
+        JArray apps = (JArray) appsIds["apps"]!;
+        JObject? found = apps
+            .FirstOrDefault(app => string.Equals((string)app["name"]!, gameName, StringComparison.OrdinalIgnoreCase)) as JObject;
+
+        if (found == null)
+        {
+            logger.LogInformation($"Not found for {gameName}");
+                        return null;
+        }
+        
+        return new Game(name: gameName, initialGameIds:[new Game.GameId(EVendor.Steam, found["appid"]!.ToString())]);
+    }
+}

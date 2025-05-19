@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using GamesFinder;
 using GamesFinder.Application;
 using GamesFinder.DAL;
 using GamesFinder.DAL.Repositories;
@@ -43,6 +46,8 @@ builder.Services.AddScoped(sp =>
 
 var twp = new TokenValidationParameters
 {
+    RoleClaimType = ClaimTypes.Role,
+    NameClaimType = JwtRegisteredClaimNames.UniqueName,
     ValidateIssuer = true,
     ValidateAudience = true,
     ValidateIssuerSigningKey = true,
@@ -62,7 +67,13 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddScoped<ISteamCrawler, SteamCrawler>();
+builder.Services.AddSingleton(new SteamOptions(
+    domainName: builder.Configuration.GetValue<string>("SteamApi:Name")!,
+    apiKey: builder.Configuration.GetValue<string>("SteamApi:Key")!
+));
+builder.Services.AddSingleton<SteamJsonFetcher>();
+builder.Services.AddSingleton<GameSteamAppIdFiner>();
+builder.Services.AddScoped<ICrawler, SteamCrawler>();
 builder.Services.AddScoped<IGameOfferRepository<GameOffer>, GameOfferRepository>();
 builder.Services.AddScoped<IGameRepository<Game>, GameRepository>();
 

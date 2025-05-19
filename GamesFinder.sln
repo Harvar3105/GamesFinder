@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "!SolutionItems", "!Solution
 		docker-compose.yaml = docker-compose.yaml
 		marks.txt = marks.txt
 		.dockerignore = .dockerignore
+		applist.json = applist.json
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder.DAL", "GamesFinder.DAL\GamesFinder.DAL.csproj", "{A4D2A49B-C6AC-4F9E-87DE-E5113F851F82}"

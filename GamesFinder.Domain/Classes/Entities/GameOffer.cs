@@ -12,16 +12,19 @@ public class GameOffer : Entity
     public Guid GameId { get; set; }
     [BsonElement("vendor")]
     public EVendor Vendor { get; set; }
+    [BsonElement("vendors_url")]
+    public string VendorsUrl { get; set; }
     [BsonElement("available")]
     public bool Available { get; set; }
     [BsonElement("price")]
     [BsonDictionaryOptions(DictionaryRepresentation.Document)]
     public Dictionary<ECurrency, PriceRange> Prices { get; set; }
 
-    public GameOffer(Guid gameId, EVendor vendor, Dictionary<ECurrency, PriceRange> prices, bool available = false)
+    public GameOffer(Guid gameId, EVendor vendor, string vendorsUrl, Dictionary<ECurrency, PriceRange> prices, bool available = false)
     {
         GameId = gameId;
         Vendor = vendor;
+        VendorsUrl = vendorsUrl;
         Available = available;
         Prices = prices;
     }

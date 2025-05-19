@@ -1,4 +1,5 @@
-﻿using GamesFinder.Domain.Interfaces.Crawlers;
+﻿using GamesFinder.Application;
+using GamesFinder.Domain.Interfaces.Crawlers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,14 +9,32 @@ namespace GamesFinder.Controllers;
 [Route("api/[controller]")]
 public class SteamCrawlerController : ControllerBase
 {
-    private readonly ISteamCrawler _steamCrawlerController;
+    private readonly ICrawler _steamCrawlerController;
     private readonly ILogger<SteamCrawlerController> _logger;
+    private readonly SteamJsonFetcher _steamJsonFetcher;
+    private readonly GameSteamAppIdFiner _gameSteamAppIdFiner;
 
-    public SteamCrawlerController(ISteamCrawler steamCrawlerController, ILogger<SteamCrawlerController> logger)
+    public SteamCrawlerController(ICrawler steamCrawlerController, ILogger<SteamCrawlerController> logger, SteamJsonFetcher steamJsonFetcher, GameSteamAppIdFiner gameSteamAppIdFiner)
     {
         _steamCrawlerController = steamCrawlerController;
-
+        _steamJsonFetcher = steamJsonFetcher;
+        _gameSteamAppIdFiner = gameSteamAppIdFiner;
         _logger = logger;
+    }
+
+    [HttpPost("AppList")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateAllGamesJson()
+    {
+        var success = await _steamJsonFetcher.Update();
+        if (!success)
+        {
+            return StatusCode(500, "Failed to fetch game list.");
+        }
+        
+        _gameSteamAppIdFiner.Update();
+        
+        return Ok();
     }
 
     [HttpPost]

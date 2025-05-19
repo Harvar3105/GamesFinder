@@ -28,6 +28,28 @@ public class GameRepository : Repository<Game>, IGameRepository<Game>
     public async Task<bool> ExistsByAppIdAsync(int appId)
     {
         return await Collection
-            .Find(g => g.GameIds.Any(v => v.Equals(appId.ToString()))).AnyAsync();
+            .Find(g => g.GameIds.Any(v => v.Id.Equals(appId.ToString()))).AnyAsync();
+    }
+
+    public async Task<bool> ExistsByAppNameAsync(string appName)
+    {
+        var allProducts = (await Collection
+            .Find(_ => true)
+            .Project(p => p.Name)
+            .ToListAsync()).OrderBy(g => g.Length);
+        
+
+        return allProducts.Any(name =>
+            appName.Contains(name, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public async Task<Game?> GetByAppNameAsync(string appName)
+    {
+        var allProducts = (await Collection
+            .Find(_ => true)
+            .ToListAsync())
+            .OrderBy(g => g.Name.Length);
+
+        return allProducts.First(g => appName.Contains(g.Name, StringComparison.OrdinalIgnoreCase));
     }
 }

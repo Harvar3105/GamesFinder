@@ -8,24 +8,23 @@ using Newtonsoft.Json.Linq;
 
 namespace GamesFinder.Application;
 
-public class SteamCrawler : ISteamCrawler
+public class SteamCrawler : Crawler, ICrawler
 {
-    private static readonly HttpClient Client = new();
-    private static readonly string GameData = "https://store.steampowered.com/api/appdetails?appids=";
     private static readonly int MaxReqs = 200;
     private static readonly int CooldownMinutes = 5;
-    private readonly ILogger<SteamCrawler> _logger;
-    private readonly IGameOfferRepository<GameOffer> _gameOfferRepository;
-    private readonly IGameRepository<Game> _gameRepository;
 
-    public SteamCrawler(ILogger<SteamCrawler> logger, IGameRepository<Game> gameRepository, IGameOfferRepository<GameOffer> gameOfferRepository)
+    public SteamCrawler(ILogger<SteamCrawler> logger, IGameRepository<Game> gameRepository, IGameOfferRepository<GameOffer> gameOfferRepository) :
+        base(
+            gameData: "https://store.steampowered.com/api/appdetails?appids=",
+            gameRepository: gameRepository,
+            gameOfferRepository: gameOfferRepository,
+            logger: logger
+            )
     {
-        _logger = logger;
-        _gameRepository = gameRepository;
-        _gameOfferRepository = gameOfferRepository;
+        
     }
 
-    public async Task CrawlGamesAsync(ICollection<int> gameIds, bool force = false)
+    public override async Task CrawlGamesAsync(ICollection<int> gameIds, bool force = false)
     {
         var games = new List<Game>();
         var callsCount = 0;
@@ -42,8 +41,10 @@ public class SteamCrawler : ISteamCrawler
             {
                 if (await _gameRepository.ExistsByAppIdAsync(gameId)) continue;
             }
+
+            var constructedUrl = GameData + gameId + "&l=ru";
             
-            var response = await Client.GetAsync(new Uri(GameData + gameId + "&l=ru"));
+            var response = await Client.GetAsync(new Uri(constructedUrl));
             callsCount++;
             if (!response.IsSuccessStatusCode)
             {
@@ -53,7 +54,7 @@ public class SteamCrawler : ISteamCrawler
             
             var json = await response.Content.ReadAsStringAsync();
             
-            Game? game = ExtractGame(gameId, json);
+            var (game, offer, isNewGame) = await ExtractData(gameId, json, constructedUrl);
             if (game == null) continue;
             
             games.Add(game);
@@ -61,43 +62,21 @@ public class SteamCrawler : ISteamCrawler
         
         await SaveOrUpdateBulk(games);
     }
-
-    private async Task SaveOrUpdateBulk(List<Game> games)
-    {
-        List<GameOffer> gamesOffers = new();
-        foreach (var game in games)
-        {
-            gamesOffers.AddRange(game.Offers);
-        }
-        
-        var success1 = await _gameRepository.SaveManyAsync(games);
-        if (!success1)
-        {
-            _logger.LogError("Something went wrong, couldn't save games");
-        }
-            
-        var success2 = await _gameOfferRepository.SaveManyAsync(gamesOffers);
-        if (!success2)
-        {
-            _logger.LogError("Something went wrong, couldn't save games");
-        }
-        
-        games.Clear();
-    }
     
-    public async Task CrawlPricesAsync(ICollection<Game> games, bool force = false)
+    
+    public override async Task CrawlPricesAsync(ICollection<Game> games, bool force = false)
     {
         var callsCount = 0;
         throw new NotImplementedException("Implement");
     }
 
-    private Game? ExtractGame(int appId, string json)
+    protected override Task<(Game?, GameOffer?, bool)> ExtractData(int appId, string content, string url)
     {
-        var jObj = JsonConvert.DeserializeObject<JObject>(json)?[$"{appId}"];
+        var jObj = JsonConvert.DeserializeObject<JObject>(content)?[$"{appId}"];
         if (jObj == null)
         {
-            _logger.LogError($"Failed to parse json: {json}");
-            return null;
+            _logger.LogError($"Failed to parse json: {content}");
+            return Task.FromResult<(Game?, GameOffer?, bool)>((null, null, false));
         }
 
         string? name = jObj["data"]?["name"]?.ToString();
@@ -108,8 +87,8 @@ public class SteamCrawler : ISteamCrawler
         string? thumbnail = jObj["data"]?["header_image"]?.ToString();
         string steamUrl = $"https://store.steampowered.com/app/{appId}";
 
-        if (name == null) return null;
-        var game = new Game(name: name, description: description, steamUrl: steamUrl, headerImage: thumbnail);
+        if (name == null) return Task.FromResult<(Game?, GameOffer?, bool)>((null, null, false));
+        Game game = new Game(name: name, description: description, steamUrl: steamUrl, headerImage: thumbnail);
         game.GameIds.Add(new Game.GameId(EVendor.Steam, appId.ToString()));
 
         Dictionary<ECurrency, GameOffer.PriceRange> prices = new();
@@ -125,10 +104,16 @@ public class SteamCrawler : ISteamCrawler
                 prices.Add(ECurrency.Usd, new GameOffer.PriceRange(decimal.Parse(initialPrice), decimal.Parse(currentPrice ?? initialPrice)));
                 break;
         }
+
+        var offer = new GameOffer(
+            gameId: game.Id!,
+            vendor: EVendor.Steam,
+            vendorsUrl: url,
+            prices: prices,
+            available: true);
         
+        game.Offers.Add(offer);
         
-        game.Offers.Add(new GameOffer(gameId: game.Id!, vendor: EVendor.Steam, prices: prices, available: true));
-        
-        return game;
+        return Task.FromResult<(Game?, GameOffer?, bool)>((game, offer, true));
     }
 }
