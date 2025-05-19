@@ -5,13 +5,13 @@ using Newtonsoft.Json.Linq;
 
 namespace GamesFinder.Application;
 
-public class GameSteamAppIdFiner
+public class GameSteamAppIdFinder
 {
     private static readonly string pathToFile = Path.Combine(Directory.GetCurrentDirectory(), "..", "applist.json");
     private JObject? appsIds = null;
-    private readonly ILogger<GameSteamAppIdFiner> logger;
+    private readonly ILogger<GameSteamAppIdFinder> logger;
 
-    public GameSteamAppIdFiner(ILogger<GameSteamAppIdFiner> logger)
+    public GameSteamAppIdFinder(ILogger<GameSteamAppIdFinder> logger)
     {
         this.logger = logger;
         
@@ -44,8 +44,14 @@ public class GameSteamAppIdFiner
 
         if (found == null)
         {
-            logger.LogInformation($"Not found for {gameName}");
-                        return null;
+            found = apps
+                .FirstOrDefault(app => string.Equals((string)app["name"]!, "Expansion - " + gameName, StringComparison.OrdinalIgnoreCase)) as JObject;
+
+            if (found == null)
+            {
+                logger.LogInformation($"Not found for {gameName}");
+                return null;
+            }
         }
         
         return new Game(name: gameName, initialGameIds:[new Game.GameId(EVendor.Steam, found["appid"]!.ToString())]);

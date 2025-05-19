@@ -9,16 +9,16 @@ namespace GamesFinder.Controllers;
 [Route("api/[controller]")]
 public class SteamCrawlerController : ControllerBase
 {
-    private readonly ICrawler _steamCrawlerController;
+    private readonly ICrawler _steamCrawler;
     private readonly ILogger<SteamCrawlerController> _logger;
     private readonly SteamJsonFetcher _steamJsonFetcher;
-    private readonly GameSteamAppIdFiner _gameSteamAppIdFiner;
+    private readonly GameSteamAppIdFinder _gameSteamAppIdFinder;
 
-    public SteamCrawlerController(ICrawler steamCrawlerController, ILogger<SteamCrawlerController> logger, SteamJsonFetcher steamJsonFetcher, GameSteamAppIdFiner gameSteamAppIdFiner)
+    public SteamCrawlerController(ICrawler steamCrawler, ILogger<SteamCrawlerController> logger, SteamJsonFetcher steamJsonFetcher, GameSteamAppIdFinder gameSteamAppIdFinder)
     {
-        _steamCrawlerController = steamCrawlerController;
+        _steamCrawler = steamCrawler;
         _steamJsonFetcher = steamJsonFetcher;
-        _gameSteamAppIdFiner = gameSteamAppIdFiner;
+        _gameSteamAppIdFinder = gameSteamAppIdFinder;
         _logger = logger;
     }
 
@@ -32,18 +32,23 @@ public class SteamCrawlerController : ControllerBase
             return StatusCode(500, "Failed to fetch game list.");
         }
         
-        _gameSteamAppIdFiner.Update();
+        _gameSteamAppIdFinder.Update();
         
         return Ok();
     }
 
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> CrawlSteam([FromBody] SteamCrawlerControllerModel request)
+    public async Task<IActionResult> CrawlSteam([FromBody] CrawlerControllerModel request)
     {
-        _logger.LogInformation("Crawling games...");
+        _logger.LogInformation("Crawling Steam games...");
         
-        var gamesIds = request.GamesIds;
+        var gamesIds = request.GamesIds!;
+        if (gamesIds == null)
+        {
+            _logger.LogCritical("Cannot crawl all games!");
+            return StatusCode(500, "Cannot crawl all games!");
+        }
         
         int batches = (int)Math.Ceiling(gamesIds.Count / (decimal)200);
         int pauses = Math.Max(0, batches - 1);
@@ -51,7 +56,7 @@ public class SteamCrawlerController : ControllerBase
 
         _ = Task.Run(async () =>
         {
-            await _steamCrawlerController.CrawlGamesAsync(gamesIds, request.ForceUpdate);
+            await _steamCrawler.CrawlGamesAsync(gamesIds, request.ForceUpdate);
             _logger.LogInformation("Crawling finished");
         });
         
@@ -59,8 +64,8 @@ public class SteamCrawlerController : ControllerBase
     }
 }
 
-public class SteamCrawlerControllerModel
+public class CrawlerControllerModel
 {
-    public required List<int> GamesIds { get; set; }
+    public List<int>? GamesIds { get; set; }
     public bool ForceUpdate { get; set; } = false;
 }

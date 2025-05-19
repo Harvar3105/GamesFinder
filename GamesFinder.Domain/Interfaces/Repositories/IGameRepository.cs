@@ -4,8 +4,8 @@ namespace GamesFinder.Domain.Interfaces.Repositories;
 
 public interface IGameRepository<TEntity> : IRepository<TEntity> where TEntity : Game
 {
-    Task<Game> GetByAppId(int appId);
-    Task<List<Game>> GetByAppIds(IEnumerable<int> appIds);
+    Task<Game?> GetByAppId(int appId);
+    Task<List<Game>?> GetByAppIds(IEnumerable<int> appIds);
     
     Task<Game?> GetByAppNameAsync(string appName);
 

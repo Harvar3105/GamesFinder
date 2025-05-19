@@ -7,49 +7,113 @@ namespace GamesFinder.DAL.Repositories;
 
 public class GameRepository : Repository<Game>, IGameRepository<Game>
 {
-    public GameRepository(IMongoDatabase database, ILogger<GameRepository> logger) : base(database, "game", logger)
+    private IGameOfferRepository<GameOffer> _gameOfferRepository;
+    public GameRepository(IMongoDatabase database, ILogger<GameRepository> logger, IGameOfferRepository<GameOffer> gameOfferRepository) : base(database, "game", logger)
     {
-        
+        _gameOfferRepository = gameOfferRepository;
     }
 
-    public async Task<Game> GetByAppId(int appId)
+    public async Task<Game?> GetByAppId(int appId)
     {
-        return await Collection
-            .Find(g => g.GameIds.Any(v => v.Id.Equals(appId.ToString())))
-            .FirstOrDefaultAsync();
+        try
+        {
+            var result = await Collection
+                                     .Find(g => g.GameIds.Any(v => v.Id.Equals(appId.ToString())))
+                                     .FirstOrDefaultAsync();
+            if (result != null)
+            {
+                result.Offers = (await _gameOfferRepository.GetByGameIdAsync(result.Id))?.ToList() ?? new List<GameOffer>();
+            }
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex.Message);
+            return null;
+        }
     }
 
-    public async Task<List<Game>> GetByAppIds(IEnumerable<int> appIds)
+    public async Task<List<Game>?> GetByAppIds(IEnumerable<int> appIds)
     {
-        return await Collection
-            .Find(g => g.GameIds.Any(v => appIds.Contains(int.Parse(v.Id)))).ToListAsync();
+        try
+        {
+            var result = await Collection
+                .Find(g => g.GameIds.Any(v => appIds.Contains(int.Parse(v.Id)))).ToListAsync();
+
+            foreach (var game in result)
+            {
+                game.Offers = (await _gameOfferRepository.GetByGameIdAsync(game.Id))?.ToList() ?? new List<GameOffer>();
+            }
+            
+            return result;
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.Message);
+            return null;
+        }
     }
 
     public async Task<bool> ExistsByAppIdAsync(int appId)
     {
-        return await Collection
-            .Find(g => g.GameIds.Any(v => v.Id.Equals(appId.ToString()))).AnyAsync();
+        try
+        {
+            return await Collection
+                .Find(g => g.GameIds.Any(v => v.Id.Equals(appId.ToString()))).AnyAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex.Message);
+            return false;
+        }
+        
     }
 
     public async Task<bool> ExistsByAppNameAsync(string appName)
     {
-        var allProducts = (await Collection
-            .Find(_ => true)
-            .Project(p => p.Name)
-            .ToListAsync()).OrderBy(g => g.Length);
+        try
+        {
+            var allProducts = (await Collection
+                .Find(_ => true)
+                .Project(p => p.Name)
+                .ToListAsync()).OrderBy(g => g.Length);
+                    
+            
+            return allProducts.Any(name =>
+                appName.Contains(name, StringComparison.OrdinalIgnoreCase));
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.Message);
+            return false;
+        }
         
-
-        return allProducts.Any(name =>
-            appName.Contains(name, StringComparison.OrdinalIgnoreCase));
     }
 
     public async Task<Game?> GetByAppNameAsync(string appName)
     {
-        var allProducts = (await Collection
-            .Find(_ => true)
-            .ToListAsync())
-            .OrderBy(g => g.Name.Length);
+        try
+        {
+            var allProducts = (await Collection
+                .Find(_ => true)
+                .ToListAsync())
+                .OrderBy(g => g.Name.Length);
 
-        return allProducts.First(g => appName.Contains(g.Name, StringComparison.OrdinalIgnoreCase));
+            var result = allProducts.First(g => appName.Contains(g.Name, StringComparison.OrdinalIgnoreCase));
+
+            if (result != null)
+            {
+                result.Offers = (await _gameOfferRepository.GetByGameIdAsync(result.Id))?.ToList() ?? new List<GameOffer>();
+            }
+            
+            return result;
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.Message);
+            return null;
+        }
+        
     }
 }

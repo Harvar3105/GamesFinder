@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace GamesFinder.Application;
+namespace GamesFinder.Application.Crawlers;
 
 public class SteamCrawler : Crawler, ICrawler
 {
@@ -24,8 +24,14 @@ public class SteamCrawler : Crawler, ICrawler
         
     }
 
-    public override async Task CrawlGamesAsync(ICollection<int> gameIds, bool force = false)
+    public override async Task CrawlGamesAsync(ICollection<int>? gameIds, bool force = false)
     {
+        if (gameIds == null)
+        {
+            Logger.LogCritical("Steam requires gameIds!");
+            return;
+        }
+        
         var games = new List<Game>();
         var callsCount = 0;
 
@@ -39,7 +45,7 @@ public class SteamCrawler : Crawler, ICrawler
 
             if (!force)
             {
-                if (await _gameRepository.ExistsByAppIdAsync(gameId)) continue;
+                if (await GameRepository.ExistsByAppIdAsync(gameId)) continue;
             }
 
             var constructedUrl = GameData + gameId + "&l=ru";
@@ -48,13 +54,13 @@ public class SteamCrawler : Crawler, ICrawler
             callsCount++;
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogError($"Error getting game data for {gameId}, ${response.StatusCode}");
+                Logger.LogError($"Error getting game data for {gameId}, ${response.StatusCode}");
                 continue;
             }
             
             var json = await response.Content.ReadAsStringAsync();
             
-            var (game, offer, isNewGame) = await ExtractData(gameId, json, constructedUrl);
+            var (game, offer, isNewGame) = await ExtractData(content: json, url: constructedUrl, appId: gameId);
             if (game == null) continue;
             
             games.Add(game);
@@ -64,18 +70,18 @@ public class SteamCrawler : Crawler, ICrawler
     }
     
     
-    public override async Task CrawlPricesAsync(ICollection<Game> games, bool force = false)
+    public override async Task CrawlPricesAsync(ICollection<Game>? games, bool force = false)
     {
         var callsCount = 0;
         throw new NotImplementedException("Implement");
     }
 
-    protected override Task<(Game?, GameOffer?, bool)> ExtractData(int appId, string content, string url)
+    protected override Task<(Game?, GameOffer?, bool)> ExtractData(string content, string url, int? appId = null, Game? existingGame = null)
     {
         var jObj = JsonConvert.DeserializeObject<JObject>(content)?[$"{appId}"];
         if (jObj == null)
         {
-            _logger.LogError($"Failed to parse json: {content}");
+            Logger.LogError($"Failed to parse json: {content}");
             return Task.FromResult<(Game?, GameOffer?, bool)>((null, null, false));
         }
 
@@ -88,7 +94,7 @@ public class SteamCrawler : Crawler, ICrawler
         string steamUrl = $"https://store.steampowered.com/app/{appId}";
 
         if (name == null) return Task.FromResult<(Game?, GameOffer?, bool)>((null, null, false));
-        Game game = new Game(name: name, description: description, steamUrl: steamUrl, headerImage: thumbnail);
+        Game game = existingGame ?? new Game(name: name, description: description, steamUrl: steamUrl, headerImage: thumbnail);
         game.GameIds.Add(new Game.GameId(EVendor.Steam, appId.ToString()));
 
         Dictionary<ECurrency, GameOffer.PriceRange> prices = new();

@@ -1,31 +1,31 @@
-﻿using AngleSharp.Html.Parser;
-using GamesFinder.Domain.Classes.Entities;
-using GamesFinder.Domain.Enums;
+﻿using GamesFinder.Domain.Classes.Entities;
 using GamesFinder.Domain.Interfaces.Crawlers;
 using GamesFinder.Domain.Interfaces.Repositories;
 using Microsoft.Extensions.Logging;
 
-namespace GamesFinder.Application;
+namespace GamesFinder.Application.Crawlers;
 
 public abstract class Crawler : ICrawler
 {
     protected static readonly HttpClient Client = new();
     protected string GameData;
-    protected readonly IGameOfferRepository<GameOffer> _gameOfferRepository;
-    protected readonly IGameRepository<Game> _gameRepository;
-    protected readonly ILogger<Crawler> _logger;
+    protected readonly IGameOfferRepository<GameOffer> GameOfferRepository;
+    protected readonly IGameRepository<Game> GameRepository;
+    protected readonly ILogger<Crawler> Logger;
 
     protected Crawler(string gameData, IGameOfferRepository<GameOffer> gameOfferRepository, IGameRepository<Game> gameRepository, ILogger<Crawler> logger)
     {
         GameData = gameData;
-        _gameOfferRepository = gameOfferRepository;
-        _gameRepository = gameRepository;
-        _logger = logger;
+        GameOfferRepository = gameOfferRepository;
+        GameRepository = gameRepository;
+        Logger = logger;
+        
+        Client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; EducationalBot/1.0)");
     }
 
-    public abstract Task CrawlGamesAsync(ICollection<int> gameIds, bool force = false);
-    public abstract Task CrawlPricesAsync(ICollection<Game> games, bool force = false);
-    protected abstract Task<(Game?, GameOffer?, bool)> ExtractData(int appId, string content, string url);
+    public abstract Task CrawlGamesAsync(ICollection<int>? gameIds, bool force = false);
+    public abstract Task CrawlPricesAsync(ICollection<Game>? games, bool force = false);
+    protected abstract Task<(Game?, GameOffer?, bool)> ExtractData(string content, string url, int? appId = null, Game? existingGame = null);
     protected async Task SaveOrUpdateBulk(List<Game> games)
     {
         if (games.Count == 0) return;
@@ -44,10 +44,10 @@ public abstract class Crawler : ICrawler
     {
         if (games.Count == 0) return;
         
-        var success1 = await _gameRepository.SaveManyAsync(games);
+        var success1 = await GameRepository.SaveManyAsync(games);
         if (!success1)
         {
-            _logger.LogError("Something went wrong, couldn't save games");
+            Logger.LogError("Something went wrong, couldn't save games");
         }
         games.Clear();
     }
@@ -56,10 +56,10 @@ public abstract class Crawler : ICrawler
     {
         if (gamesOffers.Count == 0) return;
         
-        var success2 = await _gameOfferRepository.SaveManyAsync(gamesOffers);
+        var success2 = await GameOfferRepository.SaveManyAsync(gamesOffers);
         if (!success2)
         {
-            _logger.LogError("Something went wrong, couldn't save games");
+            Logger.LogError("Something went wrong, couldn't save games");
         }
         
         gamesOffers.Clear();

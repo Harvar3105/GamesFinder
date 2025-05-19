@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using GamesFinder;
 using GamesFinder.Application;
+using GamesFinder.Application.Crawlers;
 using GamesFinder.DAL;
 using GamesFinder.DAL.Repositories;
 using GamesFinder.Domain.Classes.Entities;
@@ -72,8 +73,9 @@ builder.Services.AddSingleton(new SteamOptions(
     apiKey: builder.Configuration.GetValue<string>("SteamApi:Key")!
 ));
 builder.Services.AddSingleton<SteamJsonFetcher>();
-builder.Services.AddSingleton<GameSteamAppIdFiner>();
+builder.Services.AddSingleton<GameSteamAppIdFinder>();
 builder.Services.AddScoped<ICrawler, SteamCrawler>();
+builder.Services.AddScoped<ICrawler, InstantGamingCrawler>();
 builder.Services.AddScoped<IGameOfferRepository<GameOffer>, GameOfferRepository>();
 builder.Services.AddScoped<IGameRepository<Game>, GameRepository>();
 
