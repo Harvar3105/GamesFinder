@@ -77,6 +77,27 @@ public class GameOfferRepositoryTests : RepositoryTests<GameOfferRepository, Gam
 
         Assert.Equal(2, epicOffers.Count);
         Assert.All(epicOffers, o => Assert.Equal(vendor, o.Vendor));
+    }
 
+    [Fact]
+    public async Task GetByGameId_Should_Return_Correct_Offers()
+    {
+        var gameId = Guid.NewGuid();
+        var gameId2 = Guid.NewGuid();
+        
+        var offer1 = Generator.GenerateGameOffer(gameId: gameId);
+        var offer2 = Generator.GenerateGameOffer(gameId: gameId2);
+        
+        await _repository.SaveAsync(offer1);
+        await _repository.SaveAsync(offer2);
+        
+        var result1 = await _repository.GetByGameIdAsync(gameId);
+        var result2 = await _repository.GetByGameIdAsync(gameId2);
+        
+        //TODO: Configure Equals for GameOffer
+        Assert.NotNull(result1);
+        Assert.Equal(offer1.Id, result1.ToList()[0].Id);
+        Assert.NotNull(result2);
+        Assert.Equal(offer2.Id, result2.ToList()[0].Id);
     }
 }

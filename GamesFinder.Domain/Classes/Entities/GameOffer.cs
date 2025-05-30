@@ -28,6 +28,8 @@ public class GameOffer : Entity
         Available = available;
         Prices = prices;
     }
+    
+    //TODO: Configure Equals for object comparing
 
     public class PriceRange
     {
