@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder.Domain", "Games
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder.Application", "GamesFinder.Application\GamesFinder.Application.csproj", "{A920E5E8-005E-47C3-B35E-BFD68A8F1A51}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesFinder.Tests", "GamesFinder.Tests\GamesFinder.Tests.csproj", "{D0210F07-F6DE-457B-959D-85B01EE478B7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,5 +42,9 @@ Global
 		{A920E5E8-005E-47C3-B35E-BFD68A8F1A51}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A920E5E8-005E-47C3-B35E-BFD68A8F1A51}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A920E5E8-005E-47C3-B35E-BFD68A8F1A51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0210F07-F6DE-457B-959D-85B01EE478B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0210F07-F6DE-457B-959D-85B01EE478B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0210F07-F6DE-457B-959D-85B01EE478B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0210F07-F6DE-457B-959D-85B01EE478B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -5,7 +5,7 @@ using MongoDB.Driver;
 
 namespace GamesFinder.DAL;
 
-public class Repository<T> : IRepository<T> where T : Entity
+public abstract class Repository<T> : IRepository<T> where T : Entity
 {
     protected readonly IMongoCollection<T> Collection;
     protected readonly ILogger<Repository<T>> Logger;
