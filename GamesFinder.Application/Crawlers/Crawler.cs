@@ -25,7 +25,7 @@ public abstract class Crawler : ICrawler
 
     public abstract Task CrawlGamesAsync(ICollection<int>? gameIds, bool force = false);
     public abstract Task CrawlPricesAsync(ICollection<Game>? games, bool force = false);
-    protected abstract Task<(Game?, GameOffer?, bool)> ExtractData(string content, string url, int? appId = null, Game? existingGame = null);
+    protected abstract Task<(Game?, GameOffer?, bool)> ExtractData(string content, string url, int? appId = null, Game? existingGame = null, bool ignorePackages = true, bool forcePackageUpdate = false);
     protected async Task SaveOrUpdateBulk(List<Game> games)
     {
         if (games.Count == 0) return;

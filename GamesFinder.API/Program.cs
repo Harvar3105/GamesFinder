@@ -74,8 +74,8 @@ builder.Services.AddSingleton(new SteamOptions(
 ));
 builder.Services.AddSingleton<SteamJsonFetcher>();
 builder.Services.AddSingleton<GameSteamAppIdFinder>();
-builder.Services.AddScoped<ICrawler, SteamCrawler>();
-builder.Services.AddScoped<ICrawler, InstantGamingCrawler>();
+builder.Services.AddScoped<SteamCrawler>();
+builder.Services.AddScoped<InstantGamingCrawler>();
 builder.Services.AddScoped<IGameOfferRepository<GameOffer>, GameOfferRepository>();
 builder.Services.AddScoped<IGameRepository<Game>, GameRepository>();
 

@@ -38,8 +38,9 @@ public class GameRepository : Repository<Game>, IGameRepository<Game>
     {
         try
         {
+            var stringedIds = appIds.Select(id => id.ToString());
             var result = await Collection
-                .Find(g => g.GameIds.Any(v => appIds.Contains(int.Parse(v.Id)))).ToListAsync();
+                .Find(g => g.GameIds.Any(v => stringedIds.Contains(v.Id))).ToListAsync();
 
             foreach (var game in result)
             {

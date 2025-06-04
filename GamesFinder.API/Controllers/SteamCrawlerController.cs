@@ -1,4 +1,5 @@
 ﻿using GamesFinder.Application;
+using GamesFinder.Application.Crawlers;
 using GamesFinder.Domain.Interfaces.Crawlers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,7 @@ public class SteamCrawlerController : ControllerBase
     private readonly SteamJsonFetcher _steamJsonFetcher;
     private readonly GameSteamAppIdFinder _gameSteamAppIdFinder;
 
-    public SteamCrawlerController(ICrawler steamCrawler, ILogger<SteamCrawlerController> logger, SteamJsonFetcher steamJsonFetcher, GameSteamAppIdFinder gameSteamAppIdFinder)
+    public SteamCrawlerController(SteamCrawler steamCrawler, ILogger<SteamCrawlerController> logger, SteamJsonFetcher steamJsonFetcher, GameSteamAppIdFinder gameSteamAppIdFinder)
     {
         _steamCrawler = steamCrawler;
         _steamJsonFetcher = steamJsonFetcher;
@@ -34,7 +35,7 @@ public class SteamCrawlerController : ControllerBase
         
         _gameSteamAppIdFinder.Update();
         
-        return Ok();
+        return Accepted();
     }
 
     [HttpPost]

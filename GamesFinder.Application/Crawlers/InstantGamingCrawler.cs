@@ -127,7 +127,7 @@ public class InstantGamingCrawler :  Crawler, ICrawler
         throw new NotImplementedException();
     }
 
-    protected override async Task<(Game?, GameOffer?, bool)> ExtractData(string content, string url, int? appId = null, Game? existingGame = null)
+    protected override async Task<(Game?, GameOffer?, bool)> ExtractData(string content, string url, int? appId = null, Game? existingGame = null, bool ignorePackages = true, bool forcePackageUpdate = false)
     {
         bool newGame = false;
         var doc = await _browsingContext.OpenAsync(req => req.Content(content));

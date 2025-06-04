@@ -8,6 +8,9 @@ public class Game : Entity
 {
     [BsonElement("name")]
     public string Name { get; set; }
+    
+    [BsonElement("simplified_name")]
+    public string SimplifiedName { get; set; }
 
     [BsonElement("steam_url")]
     public string? SteamURL { get; set; }
@@ -30,11 +33,23 @@ public class Game : Entity
         )
     {
         Name = name;
+        SimplifiedName = SimplifyName(name);
         Description = description;
         Offers = initialOffers ?? new List<GameOffer>();
         GameIds = initialGameIds ?? new List<GameId>();
         SteamURL = steamUrl;
         HeaderImage = headerImage;
+    }
+    
+    private static string SimplifyName(string name)
+    {
+        var words = name.Split(' ').ToList();
+        if (words.Last().ToLower().Equals("key"))
+        {
+            words.RemoveAt(words.Count - 1);
+            return string.Join(' ', words);
+        }
+        return name;
     }
 
     public class GameId
