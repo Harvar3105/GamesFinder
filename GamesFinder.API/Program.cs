@@ -4,6 +4,7 @@ using System.Text;
 using GamesFinder;
 using GamesFinder.Application;
 using GamesFinder.Application.Crawlers;
+using GamesFinder.Application.Services;
 using GamesFinder.DAL;
 using GamesFinder.DAL.Repositories;
 using GamesFinder.Domain.Classes.Entities;
@@ -78,6 +79,8 @@ builder.Services.AddScoped<SteamCrawler>();
 builder.Services.AddScoped<InstantGamingCrawler>();
 builder.Services.AddScoped<IGameOfferRepository<GameOffer>, GameOfferRepository>();
 builder.Services.AddScoped<IGameRepository<Game>, GameRepository>();
+
+builder.Services.AddScoped<GamesWithOffersService>();
 
 
 

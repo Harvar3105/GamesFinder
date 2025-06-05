@@ -99,7 +99,7 @@ public abstract class Repository<T> : IRepository<T> where T : Entity
         return result.ModifiedCount > 0;
     }
 
-    public async Task<ICollection<T>> GetAllAsync()
+    public async Task<ICollection<T>?> GetAllAsync()
     {
         return await Collection.Find(_ => true).ToListAsync();
     }
@@ -112,5 +112,19 @@ public abstract class Repository<T> : IRepository<T> where T : Entity
     public async Task<bool> ExistsAsync(Guid id)
     {
         return await Collection.Find(e => e.Id == id).AnyAsync();
+    }
+
+    public async Task<long> CountAsync()
+    {
+        return await Collection.CountDocumentsAsync(_ => true);
+    }
+    
+    public async Task<ICollection<T>> GetPagedAsync(int page, int pageSize)
+    {
+        return await Collection
+            .Find(_ => true)
+            .Skip((page - 1) * pageSize)
+            .Limit(pageSize)
+            .ToListAsync();
     }
 }

@@ -21,4 +21,9 @@ public class GameOfferRepository : Repository<GameOffer>, IGameOfferRepository<G
     {
         return await Collection.Find(e => e.Vendor == vendor).ToListAsync();
     }
+
+    public async Task<ICollection<GameOffer>?> GetByGamesIdsAsync(ICollection<Guid> gameIds)
+    {
+        return await Collection.Find(e => gameIds.Contains(e.GameId)).ToListAsync();
+    }
 }

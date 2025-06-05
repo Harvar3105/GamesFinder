@@ -10,7 +10,11 @@ public interface IRepository<TEntity> where TEntity : Entity
     public Task<bool> SaveOrUpdateManyAsync(IEnumerable<TEntity> entities);
     Task<bool> DeleteAsync(Guid id);
     Task<bool> UpdateAsync(TEntity entity);
-    Task<ICollection<TEntity>> GetAllAsync();
+    Task<ICollection<TEntity>?> GetAllAsync();
     Task<TEntity?> GetByIdAsync(Guid id);
     public Task<bool> ExistsAsync(Guid id);
+
+    public Task<long> CountAsync();
+
+    public Task<ICollection<TEntity>> GetPagedAsync(int page, int pageSize);
 }
