@@ -6,6 +6,7 @@ COPY GamesFinder.API/GamesFinder.API.csproj GamesFinder.API/
 COPY GamesFinder.Application/GamesFinder.Application.csproj GamesFinder.Application/
 COPY GamesFinder.DAL/GamesFinder.DAL.csproj GamesFinder.DAL/
 COPY GamesFinder.Domain/GamesFinder.Domain.csproj GamesFinder.Domain/
+COPY GamesFinder.Tests/GamesFinder.Tests.csproj GamesFinder.Tests/
 
 RUN dotnet nuget locals all --clear
 RUN dotnet restore
