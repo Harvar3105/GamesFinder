@@ -1,6 +1,5 @@
 ﻿using GamesFinder.Application.Services;
-using GamesFinder.Domain.Classes.Entities;
-using GamesFinder.Domain.Interfaces.Repositories;
+using GamesFinder.Domain.Classes.Entities.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,11 +28,12 @@ public class GamesController : ControllerBase
         return Ok(games);
     }
 
-    [HttpPost]
+    [HttpGet]
     [Authorize]
     public async Task<IActionResult> GetPaged(int page, int pageSize)
     {
-        var games = await _gamesWithOffersService.GetPagedAsync(page, pageSize);
+        _logger.LogInformation($"Getting paged games with page {page} pageSize {pageSize}...");
+        var games = (await _gamesWithOffersService.GetPagedAsync(page, pageSize)).Select(g => g.ToDto());
         var totalCount = await _gamesWithOffersService.CountAsync();
         
         return Ok(new
