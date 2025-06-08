@@ -49,7 +49,7 @@ builder.Services.AddScoped(sp =>
 var twp = new TokenValidationParameters
 {
     RoleClaimType = ClaimTypes.Role,
-    NameClaimType = JwtRegisteredClaimNames.UniqueName,
+    NameClaimType = ClaimTypes.Name,
     ValidateIssuer = true,
     ValidateAudience = true,
     ValidateIssuerSigningKey = true,

@@ -31,7 +31,7 @@ public class GamesController : ControllerBase
 
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> GetAllPaged(int page, int pageSize)
+    public async Task<IActionResult> GetPaged(int page, int pageSize)
     {
         var games = await _gamesWithOffersService.GetPagedAsync(page, pageSize);
         var totalCount = await _gamesWithOffersService.CountAsync();
