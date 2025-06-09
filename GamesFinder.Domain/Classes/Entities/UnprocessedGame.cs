@@ -1,4 +1,5 @@
 ﻿using GamesFinder.Domain.Enums;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace GamesFinder.Domain.Classes.Entities;
@@ -18,7 +19,7 @@ public class UnprocessedGame: Entity
     
     [BsonElement("vendor_id")]
     public string? VendorsId { get; set; }
-    
+    [BsonRepresentation(BsonType.String)]
     [BsonElement("currency")]
     public ECurrency? Currency { get; set; }
     

@@ -10,6 +10,7 @@ public class GameOffer : Entity
     [BsonElement("game_id")]
     [BsonRepresentation(BsonType.String)]
     public Guid GameId { get; set; }
+    [BsonRepresentation(BsonType.String)]
     [BsonElement("vendor")]
     public EVendor Vendor { get; set; }
     [BsonElement("vendors_url")]

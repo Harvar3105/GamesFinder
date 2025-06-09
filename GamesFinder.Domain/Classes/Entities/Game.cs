@@ -18,6 +18,7 @@ public class Game : Entity
     public List<GameId> GameIds { get; set; } = new();
     [BsonElement("in_packages")]
     public List<int> InPackages { get; set; } = new();
+    [BsonRepresentation(BsonType.String)]
     [BsonElement("type")]
     public EType Type { get; set; }
     [BsonElement("description")]
