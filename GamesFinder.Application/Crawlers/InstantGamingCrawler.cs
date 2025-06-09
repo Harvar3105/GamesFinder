@@ -1,187 +1,143 @@
 ﻿using System.Text.RegularExpressions;
 using AngleSharp;
-using GamesFinder.Application.Crawlers;
+using AngleSharp.Dom;
 using GamesFinder.Domain.Classes.Entities;
 using GamesFinder.Domain.Enums;
 using GamesFinder.Domain.Interfaces.Crawlers;
 using GamesFinder.Domain.Interfaces.Repositories;
 using Microsoft.Extensions.Logging;
 
-namespace GamesFinder.Application;
+namespace GamesFinder.Application.Crawlers;
 
 public class InstantGamingCrawler :  Crawler, ICrawler
 {
     private static readonly string Pattern = @"^(.*?)(?:\s*\([^)]+\))?(?:\s*-\s*.+)?$";
-    private static readonly int MaxCalls = 25_000;
+    // private static readonly int MaxCalls = 25_000;
     private static readonly int SaveInterval = 200;
-    private static IBrowsingContext  _browsingContext;
+    private static readonly int ForbiddenStart = 10; // 10 first ids are not games
+    private static readonly int CooldownMinutes = 5;
+    private static IBrowsingContext _browsingContext;
     private readonly GameSteamAppIdFinder _appIdFinder;
+    private readonly IUnprocessedGamesRepository<UnprocessedGame> _unprocessedGamesRepository;
 
     public InstantGamingCrawler(
         IGameOfferRepository<GameOffer> gameOfferRepository,
         IGameRepository<Game> gameRepository,
         ILogger<InstantGamingCrawler> logger,
-        GameSteamAppIdFinder appIdFinder
-        ) : 
-        base(
+        GameSteamAppIdFinder appIdFinder,
+        IUnprocessedGamesRepository<UnprocessedGame> unprocessedGamesRepository
+        ) : base(
             "https://www.instant-gaming.com/",
             gameOfferRepository,
             gameRepository,
             logger)
     {
-        this._appIdFinder = appIdFinder;
+        _appIdFinder = appIdFinder;
+        _unprocessedGamesRepository = unprocessedGamesRepository;
         _browsingContext = BrowsingContext.New(Configuration.Default);
     }
+
 
     public override async Task CrawlGamesAsync(ICollection<int>? gameIds, bool force = false)
     {
         if (gameIds == null)
         {
-            await CrawlAllGames();
+            Logger.LogCritical("No gameIds were provided.");
             return;
         }
         
-        var offers = new List<GameOffer>();
-        var callsCount = 10;
-
         var games = await GameRepository.GetByAppIds(gameIds);
+        if (games == null)
+        {
+            Logger.LogCritical("Such games doesn't exist.");
+            return;
+        }
+        
         foreach (Game game in games)
         {
-            if (callsCount != 0 && callsCount % SaveInterval == 0)
-            {
-                Logger.LogInformation("Saving offers.");
-                await SaveOrUpdateBulkGameOffers(offers);
-            }
-
-            var vendorsId = game.GameIds.First(i => i.Vendor == EVendor.InstantGaming)?.Id;
+            var vendorsId = game.GameIds.FirstOrDefault(i => i.Vendor == EVendor.InstantGaming)?.RealId;
             if (vendorsId == null)
             {
-                Logger.LogError($"No Vendor id found for game {game.Name}!");
-                continue;
-            }
-
-            var constructedUrl = GameData + vendorsId + '-';
-            var response = await Client.GetAsync(new Uri(constructedUrl));
-            callsCount++;
-            if (!response.IsSuccessStatusCode)
-            {
-                Logger.LogError($"Error getting game data for {vendorsId}, ${response.StatusCode}\n URL: {constructedUrl}");
+                Logger.LogCritical($"{game.Name} doesn't have InstantGaming ID.");
                 continue;
             }
             
-            var page = await response.Content.ReadAsStringAsync();
-            var (relatedGame, newOffer, isNewGame) = await ExtractData(content: page, url: constructedUrl, existingGame: game);
-            if (newOffer == null) continue;
-            
-            offers.Add(newOffer);
+            var content = await GetContent(int.Parse(vendorsId));
+            game.Offers.Add(ExtractGameOffer(content, game.Id, int.Parse(vendorsId)));
         }
+        
+        var offers = new List<GameOffer>();
+        games.ForEach(g => offers.AddRange(g.Offers));
         await SaveOrUpdateBulkGameOffers(offers);
     }
 
-    private async Task CrawlAllGames()
+    public async Task CrawlAllGamesAsync(int maxCalls, bool force = false)
     {
-        var games = new List<Game>(); //new offers and games
-        var offers = new List<GameOffer>(); //Only new offers
-        var callsCount = 10;
+        var games = new List<Game>();
+        var unprocessedGames = new List<UnprocessedGame>();
+        var callsCount = ForbiddenStart;
 
-        while (callsCount < MaxCalls)
+        while (callsCount < maxCalls)
         {
             if (callsCount % SaveInterval == 0)
             {
-                Logger.LogInformation("Saving games and offers.");
-                await SaveOrUpdateBulk(games);
+                var offers = new List<GameOffer>();
+                games.ForEach(g => offers.AddRange(g.Offers));
                 await SaveOrUpdateBulkGameOffers(offers);
+                await _unprocessedGamesRepository.SaveOrUpdateManyAsync(unprocessedGames);
+                unprocessedGames.Clear();
             }
 
-            var constructedUrl = GameData + callsCount + '-';
-            
-            var response = await Client.GetAsync(new Uri(constructedUrl));
+            var vendorsId = callsCount; //Easier to understand
+
+            var content = await GetContent(vendorsId);
             callsCount++;
-            if (!response.IsSuccessStatusCode)
+            var unprocessedGame = FindGame(content);
+            if (unprocessedGame == null) continue;
+
+            var game = await GameRepository.GetByAppId(unprocessedGame.SteamId);
+            if (game == null)
             {
-                Logger.LogError($"Error getting game data for {callsCount}, ${response.StatusCode}\n URL: {constructedUrl}");
-                continue;
-            }
-            
-            var page = await response.Content.ReadAsStringAsync();
-            
-            var (game, offer, isNewGame) = await ExtractData(content:page, url: constructedUrl, appId: callsCount);
-            if (isNewGame)
-            {
-                games.Add(game!);
+                unprocessedGames.Add(unprocessedGame);
             }
             else
             {
-                if (offer == null) continue;
+                game.Offers.Add(ExtractGameOffer(content, game.Id, vendorsId));
+                games.Add(game);
             }
-            
-            offers.Add(offer!);
         }
-
-        await SaveOrUpdateBulk(games);
-        await SaveOrUpdateBulkGameOffers(offers);
     }
 
-    public override Task CrawlPricesAsync(ICollection<Game>? games, bool force = false)
+    private bool ExtractAvailability(IDocument doc)
     {
-        throw new NotImplementedException();
+        var availabilityElement = doc.QuerySelector("div.nostock");
+        return availabilityElement == null;
     }
 
-    protected override async Task<(Game?, GameOffer?, bool)> ExtractData(string content, string url, int? appId = null, Game? existingGame = null, bool ignorePackages = true, bool forcePackageUpdate = false)
+    private GameOffer ExtractGameOffer(IDocument doc, Guid gameId, int vendorsId)
     {
-        bool newGame = false;
-        var doc = await _browsingContext.OpenAsync(req => req.Content(content));
+        return new GameOffer(
+            gameId: gameId,
+            vendor: EVendor.InstantGaming,
+            vendorsUrl: GameData + vendorsId + '-',
+            available: ExtractAvailability(doc),
+            prices: ExtractPrice(doc)
+        );
+    }
 
-        var gameNameElement = doc.QuerySelector("h1.game-title");
-        if (gameNameElement == null) return (null, null, false);
-        var gameName = gameNameElement.TextContent.Trim();
-        if (string.IsNullOrEmpty(gameName))
-        {
-            Logger.LogWarning("Could not find game name!");
-            return (null, null, false);
-        }
-        
-        var regexMatch = Regex.Match(gameName, Pattern);
-        if (!regexMatch.Success)
-        {
-            Logger.LogWarning("Could not normalize game name!");
-            return (null, null, false);
-        }
-        var normalizedName = regexMatch.Groups[1].Value.Trim();
-
-        // var editionElement = doc.QuerySelector("select.other-products-choices option[selected]");
-        // if (editionElement != null)
-        // {
-        //      = editionElement.TextContent.Trim();
-        // }
-        
-        var game = existingGame ?? await GameRepository.GetByAppNameAsync(normalizedName); //provided or search or create if possible
-        if (game == null)
-        {
-            game = _appIdFinder.FindAppId(normalizedName);
-            if (game == null)
-            {
-                Logger.LogWarning($"Could not find or create game {normalizedName}!");
-                return (null, null, false);
-            }
-            newGame = true;
-        };
-        
-        if (game.GameIds.All(i => i.Vendor != EVendor.InstantGaming)) game.GameIds.Add(new Game.GameId(EVendor.InstantGaming, appId.ToString()!));
+    private Dictionary<ECurrency, GameOffer.PriceRange> ExtractPrice(IDocument doc)
+    {
+        Dictionary<ECurrency, GameOffer.PriceRange> prices = new();
         
         var gamePriceElement = doc.QuerySelector("div.total");
         if (gamePriceElement == null)
         {
-            Logger.LogWarning("Could not find game price!");
-            return (null, null, false);
+            prices.Add(ECurrency.Eur, new GameOffer.PriceRange(null, null));
+            return prices;
         }
+        
         var amount = gamePriceElement.TextContent.Trim();
         var normalizedAmount = amount.Replace("$", "").Replace("€", "");
-        
-        var availabilityElement = doc.QuerySelector("div.nostock");
-        var availability = availabilityElement == null;
-        
-        Dictionary<ECurrency, GameOffer.PriceRange> prices = new();
         switch (amount.Last())
         {
             case '€':
@@ -194,16 +150,46 @@ public class InstantGamingCrawler :  Crawler, ICrawler
                 prices.Add(ECurrency.Eur, new GameOffer.PriceRange(null, null));
                 break;
         }
+        
+        return prices;
+    }
 
-        var offer = new GameOffer(
-            gameId: game.Id,
-            vendor: EVendor.InstantGaming,
-            vendorsUrl: url,
-            available: availability,
-            prices: prices
-        );
+    private UnprocessedGame? FindGame(IDocument doc)
+    {
+        var gameName = doc.QuerySelector("h1.game-title")?.TextContent.Trim();
+        if (string.IsNullOrEmpty(gameName))
+        {
+            Logger.LogError("Could not extract game name!");
+            return null;
+        }
+        
+        var normalizedName = NormalizeGameName(gameName);
 
-        game.Offers.Add(offer);
-        return (game, offer, newGame);
+        var unprocessedGame = _appIdFinder.FindApp(normalizedName);
+        if (unprocessedGame == null)
+        {
+            Logger.LogError($"Could not find game with name {gameName}\nNormalized name: {normalizedName}");
+        }
+
+        return unprocessedGame;
+    }
+
+    private string NormalizeGameName(string gameName)
+    {
+        var regexMatch = Regex.Match(gameName, Pattern);
+        if (!regexMatch.Success)
+        {
+            Logger.LogWarning("Could not normalize game name!");
+            return gameName;
+        }
+        return regexMatch.Groups[1].Value.Trim();
+    }
+
+    private async Task<IDocument> GetContent(int gameId)
+    {
+        var constructedUrl = GameData + gameId + '-';
+        var content = await MakeRequest(constructedUrl, gameId);
+
+        return await _browsingContext.OpenAsync(req => req.Content(content));
     }
 }

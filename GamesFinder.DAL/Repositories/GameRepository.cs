@@ -18,7 +18,7 @@ public class GameRepository : Repository<Game>, IGameRepository<Game>
         try
         {
             var result = await Collection
-                                     .Find(g => g.GameIds.Any(v => v.Id.Equals(appId.ToString())))
+                                     .Find(g => g.GameIds.Any(v => v.RealId.Equals(appId.ToString())))
                                      .FirstOrDefaultAsync();
             if (result != null)
             {
@@ -40,7 +40,7 @@ public class GameRepository : Repository<Game>, IGameRepository<Game>
         {
             var stringedIds = appIds.Select(id => id.ToString());
             var result = await Collection
-                .Find(g => g.GameIds.Any(v => stringedIds.Contains(v.Id))).ToListAsync();
+                .Find(g => g.GameIds.Any(v => stringedIds.Contains(v.RealId))).ToListAsync();
 
             foreach (var game in result)
             {
@@ -61,7 +61,7 @@ public class GameRepository : Repository<Game>, IGameRepository<Game>
         try
         {
             return await Collection
-                .Find(g => g.GameIds.Any(v => v.Id.Equals(appId.ToString()))).AnyAsync();
+                .Find(g => g.GameIds.Any(v => v.RealId.Equals(appId.ToString()))).AnyAsync();
         }
         catch (Exception ex)
         {

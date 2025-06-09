@@ -30,7 +30,7 @@ public class GameSteamAppIdFinder
         }
     }
 
-    public Game? FindAppId(string gameName)
+    public UnprocessedGame? FindApp(string gameName)
     {
         if (appsIds == null)
         {
@@ -53,7 +53,15 @@ public class GameSteamAppIdFinder
                 return null;
             }
         }
-        
-        return new Game(name: gameName, initialGameIds:[new Game.GameId(EVendor.Steam, found["appid"]!.ToString())]);
+
+        var steamId = found["appid"]?.ToString();
+        var steamName = found["name"]?.ToString();
+
+        if (steamId == null || steamName == null) return null;
+        return new UnprocessedGame(
+            vendorsName: gameName,
+            steamId: int.Parse(steamId),
+            steamName: steamName
+            );
     }
 }

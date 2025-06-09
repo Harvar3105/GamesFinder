@@ -1,4 +1,5 @@
-﻿using GamesFinder.Domain.Classes.Entities;
+﻿using System.Net;
+using GamesFinder.Domain.Classes.Entities;
 using GamesFinder.Domain.Interfaces.Crawlers;
 using GamesFinder.Domain.Interfaces.Repositories;
 using Microsoft.Extensions.Logging;
@@ -8,6 +9,7 @@ namespace GamesFinder.Application.Crawlers;
 public abstract class Crawler : ICrawler
 {
     protected static readonly HttpClient Client = new();
+    private static readonly int CooldownMinutes = 5;
     protected string GameData;
     protected readonly IGameOfferRepository<GameOffer> GameOfferRepository;
     protected readonly IGameRepository<Game> GameRepository;
@@ -24,8 +26,8 @@ public abstract class Crawler : ICrawler
     }
 
     public abstract Task CrawlGamesAsync(ICollection<int>? gameIds, bool force = false);
-    public abstract Task CrawlPricesAsync(ICollection<Game>? games, bool force = false);
-    protected abstract Task<(Game?, GameOffer?, bool)> ExtractData(string content, string url, int? appId = null, Game? existingGame = null, bool ignorePackages = true, bool forcePackageUpdate = false);
+    // public abstract Task CrawlPricesAsync(ICollection<Game>? games, bool force = false);
+    // protected abstract Task ExtractData(string content, string url, int? appId = null, Game? existingGame = null, bool ignorePackages = true, bool forcePackageUpdate = false);
     protected async Task SaveOrUpdateBulk(List<Game> games)
     {
         if (games.Count == 0) return;
@@ -63,5 +65,33 @@ public abstract class Crawler : ICrawler
         }
         
         gamesOffers.Clear();
+    }
+    
+    protected async Task<string?> MakeRequest(string url, int id)
+    {
+        var response = await Client.GetAsync(new Uri(url));
+        if (!response.IsSuccessStatusCode)
+        {
+            if (response.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                Logger.LogWarning($"Process is paused for {CooldownMinutes} minutes");
+                await Task.Delay(TimeSpan.FromMinutes(CooldownMinutes));
+                response = await Client.GetAsync(new Uri(url));
+            }
+            else
+            {
+                Logger.LogError($"Error getting content for {id}, {response.StatusCode}");
+                return null;
+            }
+        }
+        try
+        {
+            return await response.Content.ReadAsStringAsync();
+        }
+        catch (Exception e)
+        {
+            Logger.LogCritical($"Could not parse content! ${e.Message}");
+            return null;
+        }
     }
 }

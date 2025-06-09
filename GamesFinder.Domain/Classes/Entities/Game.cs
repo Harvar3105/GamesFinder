@@ -16,6 +16,10 @@ public class Game : Entity
     public string? SteamURL { get; set; }
     [BsonElement("game_ids")]
     public List<GameId> GameIds { get; set; } = new();
+    [BsonElement("in_packages")]
+    public List<int> InPackages { get; set; } = new();
+    [BsonElement("type")]
+    public EType Type { get; set; }
     [BsonElement("description")]
     public string? Description { get; set; }
     [BsonElement("header_image")]
@@ -59,11 +63,14 @@ public class Game : Entity
         public EVendor Vendor { get; set; }
         [BsonElement("id")]
         public string Id { get; set; }
+        [BsonElement("real_id")]
+        public string RealId { get; set; } //Some games are encapsulated into single game packages that have different id
 
-        public GameId(EVendor vendor, string id)
+        public GameId(EVendor vendor, string id, string realId)
         {
             Vendor = vendor;
             Id = id;
+            RealId = realId;
         }
     }
 }

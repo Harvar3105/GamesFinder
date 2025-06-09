@@ -12,7 +12,6 @@ namespace GamesFinder.Application.Crawlers;
 public class SteamCrawler : Crawler, ICrawler
 {
     private static readonly int MaxReqs = 200;
-    private static readonly int CooldownMinutes = 5;
     private static readonly string PackageDetails = "https://store.steampowered.com/api/packagedetails/?packageids=";
 
     public SteamCrawler(ILogger<SteamCrawler> logger, IGameRepository<Game> gameRepository, IGameOfferRepository<GameOffer> gameOfferRepository) :
@@ -39,144 +38,154 @@ public class SteamCrawler : Crawler, ICrawler
         foreach (int gameId in gameIds)
         {
             Logger.LogInformation($"Crawling {gameId}");
-            if (!force)
-            {
-                if (await GameRepository.ExistsByAppIdAsync(gameId)) continue;
-            }
+            Game? game = await GameRepository.GetByAppId(gameId);
 
-            var constructedUrl = GameData + gameId + "&l=ru";
-            var json = await MakeRequest(constructedUrl, true, gameId);
-            if (json == null)
+            if (force || game == null)
             {
-                await SaveOrUpdateBulk(games); //If error save what processed
+                game = await GetNewGame(gameId);
+            }
+            else
+            {
+                game = await UpdateGamePrice(game);
+            }
+            
+            if (game == null)
+            {
+                Logger.LogError($"Could not find game {gameId}");
+                await SaveOrUpdateBulk(games);
                 continue;
             }
-            
-            var (game, offer, isNewGame) = await ExtractData(content: json, url: constructedUrl, appId: gameId, ignorePackages: false, forcePackageUpdate: force);
-            if (game == null) continue;
-            
             games.Add(game);
         }
         
         await SaveOrUpdateBulk(games);
     }
-    
-    
-    public override async Task CrawlPricesAsync(ICollection<Game>? games, bool force = false)
+
+    private string? ExtractName(JToken jObj)
     {
-        var callsCount = 0;
-        throw new NotImplementedException("Implement");
+        return jObj["data"]?["name"]?.ToString();
     }
 
-    protected override async Task<(Game?, GameOffer?, bool)> ExtractData(string content, string url, int? appId = null, Game? existingGame = null, bool ignorePackages = true, bool forcePackageUpdate = false)
+    private EType ExtractType(JToken jObj)
     {
-        var jObj = JsonConvert.DeserializeObject<JObject>(content)?[$"{appId}"];
-        if (jObj == null)
+        if (jObj["data"]?["type"] != null)
         {
-            Logger.LogError($"Failed to parse json: {content}");
-            return (null, null, false);
+            return EType.DLC;
         }
 
-        string? name = jObj["data"]?["name"]?.ToString();
-        string? description = jObj["data"]?["detailed_description"]?.ToString();
+        return EType.Game;
+    }
+
+    private string? ExtractDescription(JToken jObj)
+    {
+        return jObj["data"]?["about_the_game"]?.ToString();
+    }
+
+    private Dictionary<ECurrency, GameOffer.PriceRange> ExtractPrices(JToken jObj)
+    {
         string? currency = jObj["data"]?["price_overview"]?["currency"]?.ToString();
-        string initialPrice = jObj["data"]?["price_overview"]?["initial"]?.ToString() ?? "0";
-        string? currentPrice = jObj["data"]?["price_overview"]?["final"]?.ToString();
-        string? thumbnail = jObj["data"]?["header_image"]?.ToString();
-        string steamUrl = $"https://store.steampowered.com/app/{appId}";
-        string? packages = jObj["data"]?["packages"]?.ToString();
-
-        if (name == null) return (null, null, false);
-        Game game = existingGame ?? new Game(name: name, description: description, steamUrl: steamUrl, headerImage: thumbnail);
-        game.GameIds.Add(new Game.GameId(EVendor.Steam, appId.ToString()));
-
-        if (packages != null && !ignorePackages)
-        {
-            await GetPackageDetails(packages, forcePackageUpdate);
-        }
-
+        
+        string? initialPriceAsString = jObj["data"]?["price_overview"]?["initial"]?.ToString();
+        string? currentPriceAsString = jObj["data"]?["price_overview"]?["final"]?.ToString();
+        
+        decimal? initialPrice = initialPriceAsString != null ? decimal.Parse(initialPriceAsString) / 100 : null;
+        decimal? currentPrice = currentPriceAsString != null ? decimal.Parse(currentPriceAsString) / 100 : null;
+        
         Dictionary<ECurrency, GameOffer.PriceRange> prices = new();
+        
         switch (currency)
         {
             case null:
                 prices.Add(ECurrency.Eur, new GameOffer.PriceRange(null, null));
                 break;
             case "EUR":
-                prices.Add(ECurrency.Eur, new GameOffer.PriceRange(decimal.Parse(initialPrice), decimal.Parse(currentPrice ?? initialPrice)));
+                prices.Add(ECurrency.Eur, new GameOffer.PriceRange(initialPrice, currentPrice));
                 break;
             case "USD":
-                prices.Add(ECurrency.Usd, new GameOffer.PriceRange(decimal.Parse(initialPrice), decimal.Parse(currentPrice ?? initialPrice)));
+                prices.Add(ECurrency.Usd, new GameOffer.PriceRange(initialPrice, currentPrice));
                 break;
         }
+        
+        return prices;
+    }
 
-        var offer = new GameOffer(
-            gameId: game.Id!,
+    private string? ExtractThumbnail(JToken jObj)
+    {
+        return jObj["data"]?["header_image"]?.ToString();
+    }
+
+    private GameOffer ExtractGameOffer(JToken jObj, Game game)
+    {
+        return new GameOffer(
+            gameId: game.Id,
             vendor: EVendor.Steam,
-            vendorsUrl: url,
-            prices: prices,
-            available: true);
-        
-        game.Offers.Add(offer);
-        
-        return (game, offer, true);
+            vendorsUrl: game.SteamURL!,
+            prices: ExtractPrices(jObj),
+            available: true
+        );
     }
 
-    private async Task<string?> MakeRequest(string url, bool isGame, int id)
+    private async Task<Game?> GetNewGame(int gameId)
     {
-        //TODO: Use proxy? Open proxy = faster, but less safe :(
-        var response = await Client.GetAsync(new Uri(url));
-        if (!response.IsSuccessStatusCode)
+        var (jObj, isGame) = await GetIdContent(gameId);
+        if (jObj == null) return null;
+
+        var realId = gameId;
+        if (isGame == false)
         {
-            if (response.StatusCode == HttpStatusCode.TooManyRequests)
-            {
-                Logger.LogWarning($"Process is paused for {CooldownMinutes} minutes");
-                await Task.Delay(TimeSpan.FromMinutes(CooldownMinutes));
-                response = await Client.GetAsync(new Uri(url));
-            }
-            else
-            {
-                var target = isGame ? "game data" : "package data";
-                Logger.LogError($"Error getting {target} for {id}, {response.StatusCode}");
-                return null;
-            }
+            var realIdAsString = jObj["data"]?["apps"]?[0]?["id"]?.ToString();
+            if (realIdAsString == null) return null;
+            
+            realId = int.Parse(realIdAsString);
+            (jObj, isGame) = await GetIdContent(realId);
         }
 
-        try
-        {
-            return await response.Content.ReadAsStringAsync();
-        }
-        catch (Exception e)
-        {
-            Logger.LogCritical($"Could not parse content! ${e.Message}");
-            return null;
-        }
+        if (jObj == null) return null;
+
+        return ExtractGame(jObj, gameId, realId);
     }
 
-    private async Task GetPackageDetails(string packages, bool force)
+    private Game? ExtractGame(JToken jObj, int gameId, int realId)
     {
-        var parsedData = packages.Replace("[", "").Replace("]", "").Replace("\r", "").Replace("\n", "").Replace(" ", "");
-        var asList = parsedData.Split(',').ToList();
-        var games = new List<Game>();
+        string? name = ExtractName(jObj);
+        if (name == null) return null;
+        var game = new Game(name: name);
         
-        foreach (var packageId in asList)
-        {
-            int asInt = int.Parse(packageId);
-            if (!force)
-            {
-                if (await GameRepository.ExistsByAppIdAsync(asInt)) continue;
-            }
+        game.Description = ExtractDescription(jObj);
+        game.HeaderImage = ExtractThumbnail(jObj);
+        game.SteamURL = $"https://store.steampowered.com/app/{realId}";
+        game.GameIds.Add(new Game.GameId(EVendor.Steam, gameId.ToString(), realId.ToString()));
+        if (gameId != realId) game.InPackages.Add(gameId);
+        game.Type = ExtractType(jObj);
 
-            var constructedUrl = PackageDetails + packageId;
-            
-            var json = await MakeRequest(constructedUrl, false, asInt);
-            if (json == null) continue;
-            
-            var (game, offer, isNewGame) = await ExtractData(content: json, url: constructedUrl, appId: asInt, ignorePackages: true, forcePackageUpdate: force);
-            if (game == null) continue;
-            
-            games.Add(game);
-        }
+        game.Offers.Add(ExtractGameOffer(jObj, game));
+        return game;
+    }
+
+    private async Task<Game?> UpdateGamePrice(Game game)
+    {
+        var (jObj, isGame) = await GetIdContent(int.Parse(game.GameIds.First(i => i.Vendor == EVendor.Steam).RealId));
+        if (jObj == null) return null;
         
-        await SaveOrUpdateBulk(games);
+        game.Offers.Remove(game.Offers.First(o => o.Vendor == EVendor.Steam));
+        game.Offers.Add(ExtractGameOffer(jObj, game));
+        return game;
+    }
+
+    private async Task<(JToken? jObj, bool? isGame)> GetIdContent(int gameId)
+    {
+        var gameUrl = GameData + gameId + "&l=ru";
+        var packageUrl = PackageDetails + gameId + "&l=ru";
+
+        var content = await MakeRequest(gameUrl, gameId);
+        var isGame = true;
+        if (content == null || content.Contains("\"success\": false"))
+        {
+            content = await MakeRequest(packageUrl, gameId);
+            isGame = false;
+        }
+
+        if (content == null) return (null, null);
+        return (JsonConvert.DeserializeObject<JObject>(content)?[$"{gameId}"], isGame);
     }
 }
