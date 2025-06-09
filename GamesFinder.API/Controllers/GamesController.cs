@@ -1,5 +1,7 @@
 ﻿using GamesFinder.Application.Services;
+using GamesFinder.Domain.Classes.Entities;
 using GamesFinder.Domain.Classes.Entities.DTOs;
+using GamesFinder.Domain.Interfaces.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,11 +13,13 @@ public class GamesController : ControllerBase
 {
     private readonly ILogger<GamesController> _logger;
     private readonly GamesWithOffersService _gamesWithOffersService;
+    private readonly IUnprocessedGamesRepository<UnprocessedGame> _unprocessedGamesRepository;
 
-    public GamesController(ILogger<GamesController> logger,GamesWithOffersService gamesWithOffersService)
+    public GamesController(ILogger<GamesController> logger,GamesWithOffersService gamesWithOffersService, IUnprocessedGamesRepository<UnprocessedGame> unprocessedGamesRepository)
     {
         _logger = logger;
         _gamesWithOffersService = gamesWithOffersService;
+        _unprocessedGamesRepository = unprocessedGamesRepository;
     }
 
     [HttpGet]
@@ -35,6 +39,24 @@ public class GamesController : ControllerBase
         _logger.LogInformation($"Getting paged games with page {page} pageSize {pageSize}...");
         var games = (await _gamesWithOffersService.GetPagedAsync(page, pageSize)).Select(g => g.ToDto());
         var totalCount = await _gamesWithOffersService.CountAsync();
+        
+        return Ok(new
+        {
+            Items = games,
+            Count = games.Count(),
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize
+        });
+    }
+
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> GetUnprocessedPagedGames(int page, int pageSize)
+    {
+        _logger.LogInformation($"Getting unprocessed paged games with page {page} pageSize {pageSize}...");
+        var games = await _unprocessedGamesRepository.GetPagedAsync(page, pageSize);
+        var totalCount = await _unprocessedGamesRepository.CountAsync();
         
         return Ok(new
         {
