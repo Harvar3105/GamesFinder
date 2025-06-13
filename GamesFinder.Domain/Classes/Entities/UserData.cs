@@ -8,7 +8,7 @@ public class UserData : Entity
     [BsonElement("user_id")]
     public Guid UserId { get; set; }
     [BsonElement("users_wishlist")]
-    public List<string> UsersWishlist { get; set; } = new();
+    public List<int> UsersWishlist { get; set; } = new();
     [BsonElement("avatar_file_name")]
     public string? AvatarFileName { get; set; }
     [BsonElement("avatar_content")]
