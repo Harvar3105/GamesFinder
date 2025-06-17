@@ -1,4 +1,5 @@
 ﻿using GamesFinder.Domain.Interfaces.Crawlers;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace GamesFinder.Domain.Classes.Entities;
@@ -6,6 +7,7 @@ namespace GamesFinder.Domain.Classes.Entities;
 public class UserData : Entity
 {
     [BsonElement("user_id")]
+    [BsonRepresentation(BsonType.String)]
     public Guid UserId { get; set; }
     [BsonElement("users_wishlist")]
     public List<int> UsersWishlist { get; set; } = new();
