@@ -13,6 +13,6 @@ public class UserDataRepository: Repository<UserData>, IUserDataRepository
 
     public async Task<UserData?> GetByUserId(Guid userId)
     {
-        return await Collection.Find(e => e.UserId.Equals(userId)).FirstAsync();
+        return await Collection.Find(e => e.UserId.Equals(userId)).FirstOrDefaultAsync();
     }
 }
