@@ -16,11 +16,12 @@ public class UserData : Entity
     [BsonElement("avatar_file_type")]
     public string? AvatarFileType { get; set; }
 
-    public UserData(Guid userId, string? avatarFileName, string? avatarContentType, byte[]? avatarContent)
+    public UserData(Guid userId, string? avatarFileName, string? avatarContentType, byte[]? avatarContent, List<int> usersWishlist)
     {
         UserId = userId;
         AvatarFileName = avatarFileName;
         AvatarContent = avatarContent;
         AvatarFileType = avatarContentType;
+        UsersWishlist = usersWishlist;
     }
 }

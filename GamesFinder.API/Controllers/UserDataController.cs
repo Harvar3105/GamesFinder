@@ -34,8 +34,9 @@ public class UserDataController : ControllerBase
         var userData = new UserData(
             userId: Guid.Parse(userId),
             avatarFileName: model.AvatarFileName,
-            avatarContent: model.AvatarImage,
-            avatarContentType: model.AvatarContentType
+            avatarContent: model.AvatarContent,
+            avatarContentType: model.AvatarFileType,
+            usersWishlist: model.UsersWishlist?.ToList() ?? new List<int>()
         );
 
         var success = await _userDataRepository.SaveAsync(userData);
@@ -72,8 +73,9 @@ public class UserDataController : ControllerBase
 
 public class UserDataModel
 {
-    public IEnumerable<string>? WishlistIds { get; set; }
-    public byte[]? AvatarImage { get; set; }
+    public string? UserId { get; set; }
+    public IEnumerable<int>? UsersWishlist { get; set; }
+    public byte[]? AvatarContent { get; set; }
     public string? AvatarFileName { get; set; }
-    public string? AvatarContentType { get; set; }
+    public string? AvatarFileType { get; set; }
 }
