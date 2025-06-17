@@ -7,7 +7,7 @@ namespace GamesFinder.DAL.Repositories;
 
 public class UserDataRepository: Repository<UserData>, IUserDataRepository
 {
-    public UserDataRepository(IMongoDatabase database, string collectionName, ILogger<Repository<UserData>> logger) : base(database, collectionName, logger)
+    public UserDataRepository(IMongoDatabase database, ILogger<Repository<UserData>> logger) : base(database, "user_data", logger)
     {
     }
 
