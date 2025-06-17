@@ -82,6 +82,7 @@ builder.Services.AddScoped<InstantGamingCrawler>();
 builder.Services.AddScoped<IGameOfferRepository<GameOffer>, GameOfferRepository>();
 builder.Services.AddScoped<IGameRepository<Game>, GameRepository>();
 builder.Services.AddScoped<IUnprocessedGamesRepository<UnprocessedGame>, UnprocessedGamesRepository>();
+builder.Services.AddScoped<IUserDataRepository, UserDataRepository>();
 
 builder.Services.AddScoped<GamesWithOffersService>();
 
