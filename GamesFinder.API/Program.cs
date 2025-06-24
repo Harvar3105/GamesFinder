@@ -12,6 +12,7 @@ using GamesFinder.Domain.Enums;
 using GamesFinder.Domain.Interfaces.Crawlers;
 using GamesFinder.Domain.Interfaces.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson;
@@ -89,6 +90,11 @@ builder.Services.AddScoped<GamesWithOffersService>();
 
 
 BsonSerializer.RegisterSerializer(typeof(ECurrency), new EnumSerializer<ECurrency>(BsonType.String));
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MinRequestBodyDataRate = new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(30));
+});
 
 var app = builder.Build();
 
