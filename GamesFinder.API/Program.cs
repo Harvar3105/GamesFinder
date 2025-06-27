@@ -96,7 +96,7 @@ BsonSerializer.RegisterSerializer(typeof(ECurrency), new EnumSerializer<ECurrenc
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.Limits.MinRequestBodyDataRate = new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(30));
+    options.Limits.MinRequestBodyDataRate = null;
 });
 
 builder.Services.AddCors(options =>

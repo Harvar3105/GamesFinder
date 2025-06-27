@@ -22,7 +22,7 @@ public class UserDataController : ControllerBase
 
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> SaveUserData(UserDataModel model)
+    public async Task<IActionResult> SaveUserData([FromBody] UserDataModel model)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (userId == null)
