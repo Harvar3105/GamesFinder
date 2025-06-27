@@ -104,6 +104,19 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.Use(async (context, next) =>
+{
+    context.Request.EnableBuffering();
+    using var reader = new StreamReader(context.Request.Body, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
+    var body = await reader.ReadToEndAsync();
+    context.Request.Body.Position = 0;
+
+    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("Incoming Request Body: {Body}", body);
+
+    await next();
+});
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
