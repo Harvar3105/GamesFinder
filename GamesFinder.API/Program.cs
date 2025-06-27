@@ -59,15 +59,18 @@ var twp = new TokenValidationParameters
     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
         builder.Configuration.GetValue<string>("Security:JWTSecret")!
     )),
-    ClockSkew = TimeSpan.Zero
+    ClockSkew = TimeSpan.FromMinutes(1)
 };
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options => {options.TokenValidationParameters = twp; });
+// builder.Services.AddAuthentication(options =>
+// {
+//     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+// }).AddJwtBearer(options => {options.TokenValidationParameters = twp; });
+// builder.Services.AddAuthorization();
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options => {options.TokenValidationParameters = twp;});
 builder.Services.AddAuthorization();
 
 builder.Services.AddSingleton(new SteamOptions(
@@ -94,6 +97,16 @@ BsonSerializer.RegisterSerializer(typeof(ECurrency), new EnumSerializer<ECurrenc
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MinRequestBodyDataRate = new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(30));
+});
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
 });
 
 var app = builder.Build();
@@ -126,5 +139,7 @@ app.UseAuthorization();
 app.UseHttpsRedirection();
 
 app.MapControllers();
+
+app.UseCors("AllowAll");
 
 app.Run();
