@@ -114,11 +114,12 @@ public class SteamCrawler : Crawler, ICrawler
         return jObj["data"]?["header_image"]?.ToString();
     }
 
-    private GameOffer ExtractGameOffer(JToken jObj, Game game)
+    private GameOffer ExtractGameOffer(JToken jObj, Game game, string vendorsGameId)
     {
         return new GameOffer(
             gameId: game.Id,
             vendor: EVendor.Steam,
+            vendorsGameId: vendorsGameId,
             vendorsUrl: game.SteamURL!,
             prices: ExtractPrices(jObj),
             available: true
@@ -158,7 +159,7 @@ public class SteamCrawler : Crawler, ICrawler
         if (gameId != realId) game.InPackages.Add(gameId);
         game.Type = ExtractType(jObj);
 
-        game.Offers.Add(ExtractGameOffer(jObj, game));
+        game.Offers.Add(ExtractGameOffer(jObj, game, realId.ToString()));
         return game;
     }
 
@@ -168,7 +169,7 @@ public class SteamCrawler : Crawler, ICrawler
         if (jObj == null) return null;
         
         game.Offers.Remove(game.Offers.First(o => o.Vendor == EVendor.Steam));
-        game.Offers.Add(ExtractGameOffer(jObj, game));
+        game.Offers.Add(ExtractGameOffer(jObj, game, game.GameIds.FirstOrDefault(i => i.Vendor == EVendor.Steam)?.RealId!));
         return game;
     }
 

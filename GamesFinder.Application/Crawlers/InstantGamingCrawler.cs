@@ -119,6 +119,7 @@ public class InstantGamingCrawler :  Crawler, ICrawler
         return new GameOffer(
             gameId: gameId,
             vendor: EVendor.InstantGaming,
+            vendorsGameId: vendorsId.ToString(),
             vendorsUrl: GameData + vendorsId + '-',
             available: ExtractAvailability(doc),
             prices: ExtractPrice(doc)

@@ -6,6 +6,8 @@ public interface IGameRepository<TEntity> : IRepository<TEntity> where TEntity :
 {
     Task<Game?> GetByAppId(int appId);
     Task<List<Game>?> GetByAppIds(IEnumerable<int> appIds);
+
+    Task<List<string>> CheckExistManyBySteamIds(List<string> appIds);
     
     Task<Game?> GetByAppNameAsync(string appName);
 

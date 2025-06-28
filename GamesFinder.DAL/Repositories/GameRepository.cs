@@ -1,4 +1,5 @@
 ﻿using GamesFinder.Domain.Classes.Entities;
+using GamesFinder.Domain.Enums;
 using GamesFinder.Domain.Interfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
@@ -54,6 +55,17 @@ public class GameRepository : Repository<Game>, IGameRepository<Game>
             Logger.LogError(e.Message);
             return null;
         }
+    }
+
+    public async Task<List<string>> CheckExistManyBySteamIds(List<string> appIds)
+    {
+        var vendor = EVendor.Steam;
+        var existingOnes = await Collection
+            .Find(g => appIds.Contains(g.GameIds.First(i => i.Vendor == vendor).RealId))
+            .Project(g => g.GameIds.First(i => i.Vendor == vendor).RealId)
+            .ToListAsync();
+        
+        return appIds.Where(id => !existingOnes.Contains(id)).ToList();
     }
 
     public async Task<bool> ExistsByAppIdAsync(int appId)

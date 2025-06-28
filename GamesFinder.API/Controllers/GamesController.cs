@@ -70,6 +70,14 @@ public class GamesController : ControllerBase
 
     [HttpPost]
     [Authorize]
+    public async Task<IActionResult> CheckExistManyBySteamIds([FromBody] List<string> appIds)
+    {
+        var unexistingGamesIds = await _gamesWithOffersService.CheckExistManyBySteamIds(appIds);
+        return Ok(unexistingGamesIds);
+    }
+
+    [HttpPost]
+    [Authorize]
     public async Task<IActionResult> GetById(Guid id)
     {
         var result = await _gamesWithOffersService.GetByIdAsync(id);

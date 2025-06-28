@@ -47,6 +47,11 @@ public class GamesWithOffersService : IGameRepository<Game>
     {
         return await _gameRepository.UpdateAsync(entity);
     }
+    
+    public async Task<List<string>> CheckExistManyBySteamIds(List<string> appIds)
+    {
+        return await _gameRepository.CheckExistManyBySteamIds(appIds);
+    }
 
     private async Task<ICollection<Game>> FetchManyOffers(ICollection<Game> games)
     {
