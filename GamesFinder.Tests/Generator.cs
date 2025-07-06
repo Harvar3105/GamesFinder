@@ -19,6 +19,7 @@ public static class Generator
         var obj = new GameOffer(
             gameId: gameId ?? Guid.NewGuid(),
             vendor: vendor ?? (EVendor)_random.Next(0, 3),
+            vendorsGameId: (gameId ?? Guid.NewGuid()).ToString(),
             vendorsUrl: vendorsUrl ?? GetRandomString(20),
             prices: new Dictionary<ECurrency, GameOffer.PriceRange>(),
             available: available

@@ -72,7 +72,9 @@ public class GamesController : ControllerBase
     [Authorize]
     public async Task<IActionResult> CheckExistManyBySteamIds([FromBody] List<string> appIds)
     {
+        _logger.LogInformation("Checking existing games...");
         var unexistingGamesIds = await _gamesWithOffersService.CheckExistManyBySteamIds(appIds);
+        _logger.LogInformation($"Unexisting games with ids {unexistingGamesIds}");
         return Ok(unexistingGamesIds);
     }
 
