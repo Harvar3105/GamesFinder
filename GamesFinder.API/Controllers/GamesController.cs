@@ -1,7 +1,9 @@
 ﻿using GamesFinder.Application.Services;
 using GamesFinder.Domain.Classes.Entities;
 using GamesFinder.Domain.Classes.Entities.DTOs;
+using GamesFinder.Domain.Enums;
 using GamesFinder.Domain.Interfaces.Repositories;
+using GamesFinder.Domain.Interfaces.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -47,6 +49,26 @@ public class GamesController : ControllerBase
             TotalCount = totalCount,
             Page = page,
             PageSize = pageSize
+        });
+    }
+
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> GetPagedWithFilters([FromBody] FilteredPagedRequest request)
+    {
+        _logger.LogInformation($"Getting paged games with filters: ${request}");
+        var result = (await _gamesWithOffersService.GetPagedWithFiltersAsync(request.Page, request.PageSize, request.Filters));
+        var totalCount = await _gamesWithOffersService.CountAsync();
+
+        if (result is null) return NotFound();
+
+        return Ok(new
+        {
+            Items = result,
+            Count = result.Count(),
+            TotalCount = totalCount,
+            Page = request.Page,
+            PageSize = request.PageSize,
         });
     }
 
@@ -127,5 +149,17 @@ public class GamesController : ControllerBase
         {
             Amount = await _gamesWithOffersService.CountAsync()
         });
+    }
+}
+
+public class FilteredPagedRequest
+{
+    public int Page { get; set; }
+    public int PageSize { get; set; }
+    public GamesFilters Filters { get; set; }
+
+    public override string ToString()
+    {
+        return $"Page: {Page}\nPageSize: {PageSize}\nFilters:\n{Filters}";
     }
 }

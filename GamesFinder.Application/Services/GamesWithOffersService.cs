@@ -1,5 +1,6 @@
 ﻿using GamesFinder.Domain.Classes.Entities;
 using GamesFinder.Domain.Interfaces.Repositories;
+using GamesFinder.Domain.Interfaces.Requests;
 using Microsoft.Extensions.Logging;
 
 namespace GamesFinder.Application.Services;
@@ -108,6 +109,13 @@ public class GamesWithOffersService : IGameRepository<Game>
     public async Task<ICollection<Game>> GetPagedAsync(int page, int pageSize)
     {
         var games = await _gameRepository.GetPagedAsync(page, pageSize);
+        return await FetchManyOffers(games);
+    }
+
+    public async Task<ICollection<Game>?> GetPagedWithFiltersAsync(int page, int pageSize, GamesFilters filters)
+    {
+        var games = await _gameRepository.GetPagedWithFiltersAsync(page, pageSize, filters);
+        if (games is null) return null;
         return await FetchManyOffers(games);
     }
 

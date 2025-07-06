@@ -1,4 +1,5 @@
 ﻿using GamesFinder.Domain.Classes.Entities;
+using GamesFinder.Domain.Interfaces.Requests;
 
 namespace GamesFinder.Domain.Interfaces.Repositories;
 
@@ -13,4 +14,6 @@ public interface IGameRepository<TEntity> : IRepository<TEntity> where TEntity :
 
     Task<bool> ExistsByAppIdAsync(int appId);
     Task<bool> ExistsByAppNameAsync(string appName);
+    
+    public Task<ICollection<TEntity>?> GetPagedWithFiltersAsync(int page, int pageSize, GamesFilters filters);
 }
