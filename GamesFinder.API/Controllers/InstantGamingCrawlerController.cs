@@ -34,7 +34,7 @@ public class InstantGamingCrawlerController : ControllerBase
         return Accepted($"Crawling started!");
     }
 
-    [HttpPost]
+    [HttpPost("All")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> CrawlEntireInstantGaming([FromBody] InstantGamingCrawlerModel model)
     {
