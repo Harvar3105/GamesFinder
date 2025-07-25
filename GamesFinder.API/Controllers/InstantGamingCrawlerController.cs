@@ -10,7 +10,7 @@ namespace GamesFinder.Controllers;
 [Route("api/[controller]")]
 public class InstantGamingCrawlerController : ControllerBase
 {
-    private readonly ICrawler _instantGamingCrawlerController;
+    private readonly InstantGamingCrawler _instantGamingCrawlerController;
     private readonly ILogger<InstantGamingCrawlerController> _logger;
 
     public InstantGamingCrawlerController(InstantGamingCrawler instantGamingCrawler, ILogger<InstantGamingCrawlerController> logger)
@@ -33,4 +33,27 @@ public class InstantGamingCrawlerController : ControllerBase
             
         return Accepted($"Crawling started!");
     }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> CrawlEntireInstantGaming([FromBody] InstantGamingCrawlerModel model)
+    {
+        _logger.LogInformation("Crawling Instant Gaming games...");
+
+        if (model.maxCalls == 0) return StatusCode(404, "Not enough calls!");
+
+        _ = Task.Run(async () =>
+        {
+            await _instantGamingCrawlerController.CrawlAllGamesAsync(model.maxCalls, model.forceUpdate);
+            _logger.LogInformation("Crawling Instant Gaming finished");
+        });
+        
+        return Accepted($"Crawling started!");
+    }
+}
+
+public class InstantGamingCrawlerModel
+{
+    public int maxCalls { get; set; }
+    public bool forceUpdate { get; set; } = false;
 }

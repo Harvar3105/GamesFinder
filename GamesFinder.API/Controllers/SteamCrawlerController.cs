@@ -58,7 +58,7 @@ public class SteamCrawlerController : ControllerBase
         _ = Task.Run(async () =>
         {
             await _steamCrawler.CrawlGamesAsync(gamesIds, request.ForceUpdate);
-            _logger.LogInformation("Crawling finished");
+            _logger.LogInformation("Crawling Steam finished");
         });
         
         return Accepted($"Crawling started, will take around {totalCooldownMinutes} minutes");
