@@ -77,7 +77,7 @@ public class InstantGamingCrawler :  Crawler, ICrawler
         var unprocessedGames = new List<UnprocessedGame>();
         var callsCount = ForbiddenStart;
 
-        while (callsCount < maxCalls)
+        while (callsCount < maxCalls + ForbiddenStart)
         {
             if (callsCount % SaveInterval == 0)
             {
@@ -88,7 +88,7 @@ public class InstantGamingCrawler :  Crawler, ICrawler
                 unprocessedGames.Clear();
             }
 
-            var vendorsId = callsCount; //Easier to understand
+            var vendorsId = callsCount;
 
             var content = await GetContent(vendorsId);
             callsCount++;

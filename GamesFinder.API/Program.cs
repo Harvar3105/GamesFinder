@@ -62,13 +62,7 @@ var twp = new TokenValidationParameters
     ClockSkew = TimeSpan.FromMinutes(1)
 };
 
-// builder.Services.AddAuthentication(options =>
-// {
-//     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-// }).AddJwtBearer(options => {options.TokenValidationParameters = twp; });
-// builder.Services.AddAuthorization();
-
+// Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {options.TokenValidationParameters = twp;});
 builder.Services.AddAuthorization();
@@ -117,18 +111,31 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.Use(async (context, next) =>
+if (builder.Environment.IsDevelopment())
 {
-    context.Request.EnableBuffering();
-    using var reader = new StreamReader(context.Request.Body, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
-    var body = await reader.ReadToEndAsync();
-    context.Request.Body.Position = 0;
-
-    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-    logger.LogInformation("Incoming Request Body: {Body}", body);
-
-    await next();
-});
+    app.Use(async (context, next) =>
+    {
+        // Set default user
+        var identity = new ClaimsIdentity(new[]
+        {
+            new Claim(ClaimTypes.Name, "DevUser"),
+            new Claim(ClaimTypes.Role, "Admin")
+        }, "Dev");
+        context.User = new ClaimsPrincipal(identity);
+        
+        // Enable requests logging
+        context.Request.EnableBuffering();
+        using var reader = new StreamReader(context.Request.Body, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
+        var body = await reader.ReadToEndAsync();
+        context.Request.Body.Position = 0;
+    
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation("Incoming Request Body: {Body}", body);
+        
+        // Accept
+        await next();
+    });
+}
 
 app.UseSwagger();
 app.UseSwaggerUI();
