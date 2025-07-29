@@ -30,7 +30,7 @@ public class GameSteamAppIdFinder
         }
     }
 
-    public UnprocessedGame? FindApp(string gameName)
+    public UnprocessedGame? FindApp(string normalizedGameName)
     {
         if (appsIds == null)
         {
@@ -40,16 +40,16 @@ public class GameSteamAppIdFinder
         
         JArray apps = (JArray) appsIds["apps"]!;
         JObject? found = apps
-            .FirstOrDefault(app => string.Equals((string)app["name"]!, gameName, StringComparison.OrdinalIgnoreCase)) as JObject;
+            .FirstOrDefault(app => string.Equals(((string)app["name"]!).Trim(), normalizedGameName, StringComparison.OrdinalIgnoreCase)) as JObject;
 
         if (found == null)
         {
             found = apps
-                .FirstOrDefault(app => string.Equals((string)app["name"]!, "Expansion - " + gameName, StringComparison.OrdinalIgnoreCase)) as JObject;
+                .FirstOrDefault(app => string.Equals(((string)app["name"]!).Trim(), "Expansion - " + normalizedGameName, StringComparison.OrdinalIgnoreCase)) as JObject;
 
             if (found == null)
             {
-                logger.LogInformation($"Not found for {gameName}");
+                logger.LogInformation($"Not found for {normalizedGameName}");
                 return null;
             }
         }
@@ -59,7 +59,7 @@ public class GameSteamAppIdFinder
 
         if (steamId == null || steamName == null) return null;
         return new UnprocessedGame(
-            vendorsName: gameName,
+            vendorsName: normalizedGameName,
             steamId: int.Parse(steamId),
             steamName: steamName
             );

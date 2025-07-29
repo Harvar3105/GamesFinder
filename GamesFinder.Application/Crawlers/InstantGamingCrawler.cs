@@ -87,13 +87,14 @@ public class InstantGamingCrawler :  Crawler, ICrawler
                 await _unprocessedGamesRepository.SaveOrUpdateManyAsync(unprocessedGames);
                 unprocessedGames.Clear();
             }
-
             var vendorsId = callsCount;
 
             var content = await GetContent(vendorsId);
             callsCount++;
-            var unprocessedGame = FindGame(content);
+            var unprocessedGame = FindGame(content, vendorsId);
             if (unprocessedGame == null) continue;
+            unprocessedGame.VendorsId = vendorsId.ToString();
+            unprocessedGame.VendorsUrl = GameData + vendorsId + '-';
 
             var game = await GameRepository.GetByAppId(unprocessedGame.SteamId);
             if (game == null)
@@ -155,12 +156,12 @@ public class InstantGamingCrawler :  Crawler, ICrawler
         return prices;
     }
 
-    private UnprocessedGame? FindGame(IDocument doc)
+    private UnprocessedGame? FindGame(IDocument doc, int vendorsId)
     {
         var gameName = doc.QuerySelector("h1.game-title")?.TextContent.Trim();
         if (string.IsNullOrEmpty(gameName))
         {
-            Logger.LogError("Could not extract game name!");
+            Logger.LogCritical($"Could not extract game name! ID: {vendorsId}");
             return null;
         }
         
@@ -169,7 +170,11 @@ public class InstantGamingCrawler :  Crawler, ICrawler
         var unprocessedGame = _appIdFinder.FindApp(normalizedName);
         if (unprocessedGame == null)
         {
-            Logger.LogError($"Could not find game with name {gameName}\nNormalized name: {normalizedName}");
+            Logger.LogError($"Could not find game with name {gameName}\nNormalized name: '{normalizedName}'\nID: {vendorsId}");
+        }
+        else
+        {
+            unprocessedGame.VendorsName = gameName;
         }
 
         return unprocessedGame;
