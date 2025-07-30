@@ -103,6 +103,20 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Prod", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:3000",
+                "http://localhost:8080",
+                "http://localhost:27017"
+                )
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -135,6 +149,12 @@ if (builder.Environment.IsDevelopment())
         // Accept
         await next();
     });
+    
+    app.UseCors("AllowAll");
+}
+else
+{
+    app.UseCors("Prod");
 }
 
 app.UseSwagger();
@@ -146,7 +166,5 @@ app.UseAuthorization();
 app.UseHttpsRedirection();
 
 app.MapControllers();
-
-app.UseCors("AllowAll");
 
 app.Run();
