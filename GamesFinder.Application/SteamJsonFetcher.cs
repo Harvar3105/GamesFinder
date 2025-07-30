@@ -37,7 +37,7 @@ public class SteamJsonFetcher
     public async Task<bool> Update()
     {
         var key = _options.ApiKey;
-        var response = await Client.GetAsync(new Uri("http://http://api.steampowered.com/ISteamApps/GetAppList/v2/"));
+        var response = await Client.GetAsync(new Uri("http://api.steampowered.com/ISteamApps/GetAppList/v2/"));
         if (!response.IsSuccessStatusCode)
         {
             _logger.LogError("SteamJsonFetcher failed to get app list");
