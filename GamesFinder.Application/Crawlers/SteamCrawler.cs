@@ -11,7 +11,7 @@ namespace GamesFinder.Application.Crawlers;
 
 public class SteamCrawler : Crawler, ICrawler
 {
-    private static readonly int MaxReqs = 200;
+    private static readonly int SavePeriod = 200;
     private static readonly string PackageDetails = "https://store.steampowered.com/api/packagedetails/?packageids=";
 
     public SteamCrawler(ILogger<SteamCrawler> logger, IGameRepository<Game> gameRepository, IGameOfferRepository<GameOffer> gameOfferRepository) :
@@ -22,8 +22,8 @@ public class SteamCrawler : Crawler, ICrawler
             logger: logger
             )
     {
-        
     }
+    
 
     public override async Task CrawlGamesAsync(ICollection<int>? gameIds, bool force = false)
     {
@@ -34,9 +34,16 @@ public class SteamCrawler : Crawler, ICrawler
         }
         
         var games = new List<Game>();
+        var counter = 0;
 
         foreach (int gameId in gameIds)
         {
+            if (counter % SavePeriod == 0)
+            {
+                await SaveOrUpdateBulk(games);
+                games.Clear();
+            }
+            
             Logger.LogInformation($"Crawling {gameId}");
             Game? game = await GameRepository.GetByAppId(gameId);
 
@@ -56,6 +63,7 @@ public class SteamCrawler : Crawler, ICrawler
                 continue;
             }
             games.Add(game);
+            counter++;
         }
         
         await SaveOrUpdateBulk(games);

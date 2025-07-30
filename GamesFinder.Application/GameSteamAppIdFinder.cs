@@ -30,6 +30,21 @@ public class GameSteamAppIdFinder
         }
     }
 
+    public List<int>? GetAllAppsIds()
+    {
+        if (appsIds == null)
+        {
+            logger.LogError("File not found!");
+            return null;
+        }
+        
+        JArray apps = (JArray) appsIds["apps"]!;
+    
+        return apps
+            .Select(app => (int)app["appid"]!)
+            .ToList();
+    }
+
     public UnprocessedGame? FindApp(string normalizedGameName)
     {
         if (appsIds == null)

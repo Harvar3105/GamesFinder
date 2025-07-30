@@ -38,6 +38,25 @@ public class SteamCrawlerController : ControllerBase
         return Accepted();
     }
 
+    public async Task<IActionResult> CrawlAllGamesJson()
+    {
+        var ids = _gameSteamAppIdFinder.GetAllAppsIds();
+        if (ids is null)
+        {
+            _logger.LogError("No game IDs found");
+            return NotFound();
+        }
+
+        _logger.LogInformation("Crawling all games from Steam...");
+        
+        _ = Task.Run(async () =>
+        {
+           await _steamCrawler.CrawlGamesAsync(gameIds: ids);
+        });
+        
+        return Accepted();
+    }
+
     [HttpPost]
     [Authorize]
     public async Task<IActionResult> CrawlSteam([FromBody] CrawlerControllerModel request)
