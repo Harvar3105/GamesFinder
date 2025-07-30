@@ -59,7 +59,7 @@ public class SteamCrawlerController : ControllerBase
         return Accepted();
     }
 
-    [HttpGet]
+    [HttpGet("JsonMetadata")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetAllGamesJsonMetadata()
     {
