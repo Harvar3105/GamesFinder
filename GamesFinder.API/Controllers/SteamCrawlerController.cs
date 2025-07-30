@@ -38,6 +38,8 @@ public class SteamCrawlerController : ControllerBase
         return Accepted();
     }
 
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> CrawlAllGamesJson()
     {
         var ids = _gameSteamAppIdFinder.GetAllAppsIds();
@@ -55,6 +57,22 @@ public class SteamCrawlerController : ControllerBase
         });
         
         return Accepted();
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAllGamesJsonMetadata()
+    {
+        var metadata = await _steamJsonFetcher.GetMetadata();
+
+        if (metadata is null)
+        {
+            return NotFound();
+        }
+        else
+        {
+            return Ok(metadata);
+        }
     }
 
     [HttpPost]

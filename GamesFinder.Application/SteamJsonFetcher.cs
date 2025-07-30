@@ -10,11 +10,28 @@ public class SteamJsonFetcher
     private static readonly HttpClient Client = new();
     private readonly ILogger<SteamJsonFetcher> _logger;
     private readonly SteamOptions _options;
+    private string _filePath;
 
     public SteamJsonFetcher(ILogger<SteamJsonFetcher> logger, SteamOptions options)
     {
         _logger = logger;
         _options = options;
+        _filePath = Path.Combine(Directory.GetCurrentDirectory(), "..", "applist.json");;
+    }
+
+    public async Task<( DateTime, int )?> GetMetadata()
+    {
+        try
+        {
+            var fileInfo = new FileInfo(_filePath);
+            var apps = (JArray) JObject.Parse(await File.ReadAllTextAsync(_filePath))["apps"]!;
+            
+            return (fileInfo.LastWriteTime, apps.Count);
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
     }
 
     public async Task<bool> Update()
@@ -35,8 +52,7 @@ public class SteamJsonFetcher
             return false;
         }
         
-        string filePath = Path.Combine(Directory.GetCurrentDirectory(), "..", "applist.json");
-        await File.WriteAllTextAsync(filePath, jObj.ToString(Formatting.Indented), Encoding.UTF8);
+        await File.WriteAllTextAsync(_filePath, jObj.ToString(Formatting.Indented), Encoding.UTF8);
         return true;
     }
 }
