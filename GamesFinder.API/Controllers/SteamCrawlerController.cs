@@ -38,7 +38,7 @@ public class SteamCrawlerController : ControllerBase
         return Accepted();
     }
 
-    [HttpPost]
+    [HttpPost("AllGamesCrawl")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> CrawlAllGamesJson()
     {
@@ -71,11 +71,14 @@ public class SteamCrawlerController : ControllerBase
         }
         else
         {
-            return Ok(metadata);
+            return Ok(new {
+                LastMod = metadata.Value.Item1,
+                ContentCount = metadata.Value.Item2
+            });
         }
     }
 
-    [HttpPost]
+    [HttpPost("Crawl")]
     [Authorize]
     public async Task<IActionResult> CrawlSteam([FromBody] CrawlerControllerModel request)
     {
