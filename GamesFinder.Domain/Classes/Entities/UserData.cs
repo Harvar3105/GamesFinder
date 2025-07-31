@@ -6,15 +6,22 @@ namespace GamesFinder.Domain.Classes.Entities;
 
 public class UserData : Entity
 {
-    [BsonElement("user_id")]
+    [BsonIgnore]
+    public new Guid Id { get; set; }
+
+    [BsonElement("_id")]
     [BsonRepresentation(BsonType.String)]
     public Guid UserId { get; set; }
+    
     [BsonElement("users_wishlist")]
     public List<int> UsersWishlist { get; set; } = new();
+    
     [BsonElement("avatar_file_name")]
     public string? AvatarFileName { get; set; }
+    
     [BsonElement("avatar_content")]
     public byte[]? AvatarContent { get; set; }
+    
     [BsonElement("avatar_file_type")]
     public string? AvatarFileType { get; set; }
 

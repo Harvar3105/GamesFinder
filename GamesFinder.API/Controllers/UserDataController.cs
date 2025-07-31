@@ -39,7 +39,7 @@ public class UserDataController : ControllerBase
             usersWishlist: model.UsersWishlist?.ToList() ?? new List<int>()
         );
 
-        var success = await _userDataRepository.SaveAsync(userData);
+        var success = await _userDataRepository.SaveOrUpdateAsync(userData);
         if (!success)
         {
             _logger.LogError("Could not save user data!");
@@ -60,7 +60,7 @@ public class UserDataController : ControllerBase
             return BadRequest("Could not find user id!");
         }
         
-        var result = await _userDataRepository.GetByUserId(Guid.Parse(userId));
+        var result = await _userDataRepository.GetByIdAsync(Guid.Parse(userId));
         if (result == null)
         {
             _logger.LogError("Could not find user data!");
